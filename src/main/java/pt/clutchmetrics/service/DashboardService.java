@@ -5,7 +5,9 @@ import pt.clutchmetrics.dto.DashboardSummaryResponse;
 import pt.clutchmetrics.dto.MatchResponse;
 import pt.clutchmetrics.entity.GameCode;
 import pt.clutchmetrics.entity.MatchResult;
-
+import pt.clutchmetrics.dto.DashboardEvolutionPointResponse;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -87,5 +89,43 @@ public class DashboardService {
 
     private double round(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    public List<DashboardEvolutionPointResponse> getEvolution(
+            String email,
+            GameCode gameCode,
+            int limit) {
+
+        List<MatchResponse> matches =
+                gameMatchService.getMyMatches(
+                        email,
+                        gameCode,
+                        null
+                );
+
+        List<MatchResponse> limitedMatches =
+                matches.stream()
+                        .limit(limit)
+                        .toList();
+
+        List<MatchResponse> chronological =
+                new ArrayList<>(limitedMatches);
+
+        Collections.reverse(chronological);
+
+        return chronological.stream()
+                .map(match ->
+                        new DashboardEvolutionPointResponse(
+                                match.getMatchId(),
+                                match.getPlayedAt(),
+                                match.getGameCode(),
+                                match.getResult(),
+                                match.getKda(),
+                                match.getKills(),
+                                match.getDeaths(),
+                                match.getAssists()
+                        )
+                )
+                .toList();
     }
 }

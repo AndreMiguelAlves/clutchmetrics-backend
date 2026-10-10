@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import pt.clutchmetrics.dto.DashboardSummaryResponse;
 import pt.clutchmetrics.entity.GameCode;
 import pt.clutchmetrics.service.DashboardService;
+import pt.clutchmetrics.dto.DashboardEvolutionPointResponse;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -30,6 +33,31 @@ public class DashboardController {
                 dashboardService.getSummary(
                         authentication.getName(),
                         gameCode
+                );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/evolution")
+    public ResponseEntity<List<DashboardEvolutionPointResponse>> getEvolution(
+            Authentication authentication,
+
+            @RequestParam(required = false)
+            GameCode gameCode,
+
+            @RequestParam(defaultValue = "10")
+            int limit) {
+
+        int safeLimit = Math.min(
+                Math.max(limit, 1),
+                50
+        );
+
+        List<DashboardEvolutionPointResponse> response =
+                dashboardService.getEvolution(
+                        authentication.getName(),
+                        gameCode,
+                        safeLimit
                 );
 
         return ResponseEntity.ok(response);
