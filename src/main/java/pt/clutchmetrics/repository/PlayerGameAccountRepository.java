@@ -25,4 +25,10 @@ public interface PlayerGameAccountRepository
             PlayerProfile playerProfile,
             Game game
     );
+
+    @EntityGraph(attributePaths = "game")
+    Optional<PlayerGameAccount> findByIdAndPlayerProfile(
+            Long id,
+            PlayerProfile playerProfile
+    );
 }
