@@ -208,4 +208,89 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
+
+    @ExceptionHandler(PlayerProfileNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePlayerProfileNotFound(
+            PlayerProfileNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(GameNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGameNotFound(
+            GameNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(DuplicatePlayerGameAccountException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicatePlayerGameAccount(
+            DuplicatePlayerGameAccountException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(SubscriptionNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleSubscriptionNotFound(
+            SubscriptionNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(InvalidSubscriptionChangeException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSubscriptionChange(
+            InvalidSubscriptionChangeException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
 }

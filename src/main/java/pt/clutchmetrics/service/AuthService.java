@@ -38,6 +38,8 @@ public class AuthService {
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final RefreshTokenService refreshTokenService;
+    private final PlayerProfileService playerProfileService;
+    private final SubscriptionService subscriptionService;
 
     public AuthService(
             UserRepository userRepository,
@@ -46,7 +48,9 @@ public class AuthService {
             EmailVerificationTokenRepository emailVerificationTokenRepository,
             PasswordResetTokenRepository passwordResetTokenRepository,
             RefreshTokenService refreshTokenService,
-            EmailService emailService) {
+            EmailService emailService,
+            PlayerProfileService playerProfileService,
+            SubscriptionService subscriptionService) {
 
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -55,6 +59,8 @@ public class AuthService {
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.refreshTokenService = refreshTokenService;
+        this.playerProfileService = playerProfileService;
+        this.subscriptionService = subscriptionService;
     }
 
     @Transactional
@@ -88,6 +94,10 @@ public class AuthService {
         user.addRole(userRole);
 
         User savedUser = userRepository.save(user);
+
+        playerProfileService.createProfileForUser(savedUser);
+
+        subscriptionService.createFreeSubscription(savedUser);
 
         String token = UUID.randomUUID().toString();
 
