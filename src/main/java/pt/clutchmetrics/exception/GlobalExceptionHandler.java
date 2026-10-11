@@ -310,4 +310,119 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(error);
     }
+
+    @ExceptionHandler(ClipNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleClipNotFound(
+            ClipNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(InvalidClipStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidClipState(
+            InvalidClipStateException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+    @ExceptionHandler(DuplicateClipLikeException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateClipLike(
+            DuplicateClipLikeException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(ClipCommentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleClipCommentNotFound(
+            ClipCommentNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+    @ExceptionHandler(ChallengeNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleChallengeNotFound(
+            ChallengeNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+    @ExceptionHandler(DuplicateChallengeParticipationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateChallengeParticipation(
+            DuplicateChallengeParticipationException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+    @ExceptionHandler(InvalidChallengeStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidChallengeState(
+            InvalidChallengeStateException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
 }

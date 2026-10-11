@@ -24,17 +24,20 @@ public class GameMatchService {
     private final MatchMetricsRepository matchMetricsRepository;
     private final PlayerGameAccountRepository playerGameAccountRepository;
     private final PlayerProfileService playerProfileService;
+    private final ChallengeService challengeService;
 
     public GameMatchService(
             GameMatchRepository gameMatchRepository,
             MatchMetricsRepository matchMetricsRepository,
             PlayerGameAccountRepository playerGameAccountRepository,
-            PlayerProfileService playerProfileService) {
+            PlayerProfileService playerProfileService,
+            ChallengeService challengeService) {
 
         this.gameMatchRepository = gameMatchRepository;
         this.matchMetricsRepository = matchMetricsRepository;
         this.playerGameAccountRepository = playerGameAccountRepository;
         this.playerProfileService = playerProfileService;
+        this.challengeService = challengeService;
     }
 
     @Transactional
@@ -83,6 +86,13 @@ public class GameMatchService {
         metrics.setScore(request.getScore());
 
         matchMetricsRepository.save(metrics);
+
+// Atualiza o progresso dos challenges
+        challengeService.updateProgressForMatch(
+                email,
+                savedMatch,
+                metrics
+        );
 
         return toResponse(
                 savedMatch,
