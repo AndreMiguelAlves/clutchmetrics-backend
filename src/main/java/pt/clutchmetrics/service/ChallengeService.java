@@ -9,6 +9,8 @@ import pt.clutchmetrics.exception.InvalidChallengeStateException;
 import pt.clutchmetrics.repository.ChallengeParticipationRepository;
 import pt.clutchmetrics.repository.ChallengeRepository;
 import pt.clutchmetrics.repository.UserRepository;
+import pt.clutchmetrics.audit.AuditAction;
+import pt.clutchmetrics.audit.AuditService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,15 +21,18 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeParticipationRepository participationRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     public ChallengeService(
             ChallengeRepository challengeRepository,
             ChallengeParticipationRepository participationRepository,
+            AuditService auditService,
             UserRepository userRepository) {
 
         this.challengeRepository = challengeRepository;
         this.participationRepository = participationRepository;
         this.userRepository = userRepository;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -91,9 +96,21 @@ public class ChallengeService {
                         user
                 );
 
-        return participationRepository.save(
-                participation
+        ChallengeParticipation savedParticipation =
+                participationRepository.save(
+                        participation
+                );
+
+        auditService.log(
+                user,
+                AuditAction.CHALLENGE_JOINED,
+                "Challenge",
+                challenge.getId(),
+                "Utilizador entrou no challenge: "
+                        + challenge.getTitle()
         );
+
+        return savedParticipation;
     }
 
     @Transactional(readOnly = true)
@@ -198,6 +215,15 @@ public class ChallengeService {
                 participation.setCompleted(true);
                 participation.setCompletedAt(
                         LocalDateTime.now()
+                );
+
+                auditService.log(
+                        user,
+                        AuditAction.CHALLENGE_COMPLETED,
+                        "Challenge",
+                        challenge.getId(),
+                        "Utilizador completou o challenge: "
+                                + challenge.getTitle()
                 );
             }
 

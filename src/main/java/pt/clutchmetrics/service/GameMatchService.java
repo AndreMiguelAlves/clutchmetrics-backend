@@ -14,6 +14,8 @@ import pt.clutchmetrics.repository.MatchMetricsRepository;
 import pt.clutchmetrics.repository.PlayerGameAccountRepository;
 import pt.clutchmetrics.entity.GameCode;
 import pt.clutchmetrics.entity.MatchResult;
+import pt.clutchmetrics.audit.AuditAction;
+import pt.clutchmetrics.audit.AuditService;
 
 import java.util.List;
 
@@ -25,19 +27,22 @@ public class GameMatchService {
     private final PlayerGameAccountRepository playerGameAccountRepository;
     private final PlayerProfileService playerProfileService;
     private final ChallengeService challengeService;
+    private final AuditService auditService;
 
     public GameMatchService(
             GameMatchRepository gameMatchRepository,
             MatchMetricsRepository matchMetricsRepository,
             PlayerGameAccountRepository playerGameAccountRepository,
             PlayerProfileService playerProfileService,
-            ChallengeService challengeService) {
+            ChallengeService challengeService,
+            AuditService auditService) {
 
         this.gameMatchRepository = gameMatchRepository;
         this.matchMetricsRepository = matchMetricsRepository;
         this.playerGameAccountRepository = playerGameAccountRepository;
         this.playerProfileService = playerProfileService;
         this.challengeService = challengeService;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -87,11 +92,18 @@ public class GameMatchService {
 
         matchMetricsRepository.save(metrics);
 
-// Atualiza o progresso dos challenges
         challengeService.updateProgressForMatch(
                 email,
                 savedMatch,
                 metrics
+        );
+
+        auditService.log(
+                gameAccount.getPlayerProfile().getUser(),
+                AuditAction.MATCH_CREATED,
+                "GameMatch",
+                savedMatch.getId(),
+                "Partida criada com resultado: " + savedMatch.getResult()
         );
 
         return toResponse(

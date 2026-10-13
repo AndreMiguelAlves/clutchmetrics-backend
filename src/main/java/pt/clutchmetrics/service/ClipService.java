@@ -26,6 +26,8 @@ import pt.clutchmetrics.repository.ClipLikeRepository;
 import pt.clutchmetrics.repository.ClipRepository;
 import pt.clutchmetrics.repository.GameRepository;
 import pt.clutchmetrics.repository.UserRepository;
+import pt.clutchmetrics.audit.AuditAction;
+import pt.clutchmetrics.audit.AuditService;
 
 import java.util.List;
 
@@ -37,12 +39,14 @@ public class ClipService {
     private final GameRepository gameRepository;
     private final ClipLikeRepository clipLikeRepository;
     private final ClipCommentRepository clipCommentRepository;
+    private final AuditService auditService;
 
     public ClipService(
             ClipRepository clipRepository,
             UserRepository userRepository,
             GameRepository gameRepository,
             ClipLikeRepository clipLikeRepository,
+            AuditService auditService,
             ClipCommentRepository clipCommentRepository) {
 
         this.clipRepository = clipRepository;
@@ -50,6 +54,7 @@ public class ClipService {
         this.gameRepository = gameRepository;
         this.clipLikeRepository = clipLikeRepository;
         this.clipCommentRepository = clipCommentRepository;
+        this.auditService = auditService;
     }
 
     // =========================================================
@@ -187,7 +192,17 @@ public class ClipService {
                 ClipVisibility.PUBLIC
         );
 
-        return clipRepository.save(clip);
+        Clip savedClip = clipRepository.save(clip);
+
+        auditService.log(
+                savedClip.getUser(),
+                AuditAction.CLIP_PUBLISHED,
+                "Clip",
+                savedClip.getId(),
+                "Utilizador publicou o clip: " + savedClip.getTitle()
+        );
+
+        return savedClip;
     }
 
     // =========================================================

@@ -1,0 +1,21 @@
+package pt.clutchmetrics.audit;
+
+public enum AuditAction {
+
+    USER_REGISTERED,
+    PASSWORD_CHANGED,
+
+    USER_STATUS_CHANGED,
+    USER_ROLES_CHANGED,
+
+    SUBSCRIPTION_CHANGED,
+
+    CLIP_CREATED,
+    CLIP_PUBLISHED,
+    CLIP_UNPUBLISHED,
+
+    CHALLENGE_JOINED,
+    CHALLENGE_COMPLETED,
+
+    MATCH_CREATED
+}

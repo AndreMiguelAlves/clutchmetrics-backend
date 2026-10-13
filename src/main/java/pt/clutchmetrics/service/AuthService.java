@@ -24,6 +24,8 @@ import java.util.UUID;
 import pt.clutchmetrics.exception.ExpiredPasswordResetTokenException;
 import pt.clutchmetrics.exception.InvalidPasswordResetTokenException;
 import pt.clutchmetrics.exception.InvalidCurrentPasswordException;
+import pt.clutchmetrics.audit.AuditAction;
+import pt.clutchmetrics.audit.AuditService;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -40,6 +42,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final PlayerProfileService playerProfileService;
     private final SubscriptionService subscriptionService;
+    private final AuditService auditService;
 
     public AuthService(
             UserRepository userRepository,
@@ -50,6 +53,7 @@ public class AuthService {
             RefreshTokenService refreshTokenService,
             EmailService emailService,
             PlayerProfileService playerProfileService,
+            AuditService auditService,
             SubscriptionService subscriptionService) {
 
         this.userRepository = userRepository;
@@ -61,6 +65,7 @@ public class AuthService {
         this.refreshTokenService = refreshTokenService;
         this.playerProfileService = playerProfileService;
         this.subscriptionService = subscriptionService;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -270,5 +275,13 @@ public class AuthService {
         userRepository.save(user);
 
         refreshTokenService.revokeAllUserTokens(user);
+
+        auditService.log(
+                user,
+                AuditAction.PASSWORD_CHANGED,
+                "User",
+                user.getId(),
+                "Utilizador alterou a password."
+        );
     }
 }

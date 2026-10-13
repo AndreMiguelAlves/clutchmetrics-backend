@@ -12,6 +12,8 @@ import pt.clutchmetrics.repository.UserRepository;
 import pt.clutchmetrics.exception.SubscriptionNotFoundException;
 import pt.clutchmetrics.exception.InvalidSubscriptionChangeException;
 import java.time.LocalDateTime;
+import pt.clutchmetrics.audit.AuditAction;
+import pt.clutchmetrics.audit.AuditService;
 
 
 @Service
@@ -21,15 +23,18 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     public SubscriptionService(
             SubscriptionRepository subscriptionRepository,
             PlanRepository planRepository,
+            AuditService auditService,
             UserRepository userRepository) {
 
         this.subscriptionRepository = subscriptionRepository;
         this.planRepository = planRepository;
         this.userRepository = userRepository;
+        this.auditService = auditService;
 
 
     }
@@ -80,6 +85,10 @@ public Subscription getMySubscription(String email) {
 
         Plan currentPlan = subscription.getPlan();
 
+        String oldPlan =
+                currentPlan.getCode()
+                        .name();
+
         if (currentPlan.getCode() == newPlanCode) {
             throw new InvalidSubscriptionChangeException(
                     "Já tens este plano ativo."
@@ -116,7 +125,24 @@ public Subscription getMySubscription(String email) {
             subscription.setEndsAt(null);
         }
 
-        return subscriptionRepository.save(subscription);
+        Subscription savedSubscription =
+                subscriptionRepository.save(subscription);
+
+        auditService.log(
+                savedSubscription.getUser(),
+                AuditAction.SUBSCRIPTION_CHANGED,
+                "Subscription",
+                savedSubscription.getId(),
+                "Subscrição alterada de "
+                        + oldPlan
+                        + " para "
+                        + savedSubscription.getPlan()
+                        .getCode()
+                        .name()
+        );
+
+        return savedSubscription;
+
     }
 
 }

@@ -49,7 +49,11 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
                 .formLogin(form -> form.disable())

@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -425,4 +426,44 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(error);
     }
+
+    @ExceptionHandler(AdminUserNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse>
+    handleAdminUserNotFound(
+            AdminUserNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error =
+                new ApiErrorResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        "Not Found",
+                        exception.getMessage(),
+                        request.getRequestURI()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(InvalidAdminOperationException.class)
+    public ResponseEntity<ApiErrorResponse>
+    handleInvalidAdminOperation(
+            InvalidAdminOperationException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error =
+                new ApiErrorResponse(
+                        HttpStatus.CONFLICT.value(),
+                        "Conflict",
+                        exception.getMessage(),
+                        request.getRequestURI()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+
 }
