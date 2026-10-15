@@ -57,22 +57,34 @@ public class SubscriptionService {
 
         return subscriptionRepository.save(subscription);
     }
-@Transactional(readOnly = true)
-public Subscription getMySubscription(String email) {
+    @Transactional
+    public Subscription getMySubscription(String email) {
 
-    User user = userRepository
-            .findByEmail(email)
-            .orElseThrow(() ->
-                    new SubscriptionNotFoundException(
-                            "Utilizador não encontrado."
-                    ));
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new SubscriptionNotFoundException(
+                                "Utilizador não encontrado."
+                        )
+                );
 
-    return subscriptionRepository
-            .findByUser(user)
-            .orElseThrow(() ->
-                    new SubscriptionNotFoundException(
-                            "Subscrição não encontrada."
-                    ));
+        Subscription subscription = subscriptionRepository
+                .findByUser(user)
+                .orElse(null);
+
+        if (subscription == null) {
+            createFreeSubscription(user);
+
+            subscription = subscriptionRepository
+                    .findByUser(user)
+                    .orElseThrow(() ->
+                            new SubscriptionNotFoundException(
+                                    "Não foi possível criar a subscrição."
+                            )
+                    );
+        }
+
+        return subscription;
     }
 
     @Transactional

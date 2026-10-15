@@ -98,12 +98,18 @@ public class ClipController {
     }
 
     @GetMapping("/feed")
-    public ResponseEntity<List<ClipResponse>> getFeed() {
+    public ResponseEntity<List<ClipResponse>> getFeed(
+            Authentication authentication) {
 
         List<ClipResponse> response = clipService
                 .getFeed()
                 .stream()
-                .map(this::toResponse)
+                .map(clip ->
+                        toFeedResponse(
+                                clip,
+                                authentication.getName()
+                        )
+                )
                 .toList();
 
         return ResponseEntity.ok(response);
@@ -209,7 +215,42 @@ public class ClipController {
                 clip.getUpdatedAt(),
 
                 clipService.countLikes(clip),
-                clipService.countComments(clip)
+                clipService.countComments(clip),
+                false
         );
     }
+
+    private ClipResponse toFeedResponse(
+            Clip clip,
+            String email) {
+
+        return new ClipResponse(
+                clip.getId(),
+                clip.getUser().getId(),
+                clip.getUser().getUsername(),
+
+                clip.getGame() != null
+                        ? clip.getGame().getCode()
+                        : null,
+
+                clip.getGame() != null
+                        ? clip.getGame().getName()
+                        : null,
+
+                clip.getTitle(),
+                clip.getDescription(),
+                clip.getVideoUrl(),
+                clip.getThumbnailUrl(),
+                clip.getDurationSeconds(),
+                clip.getStatus(),
+                clip.getVisibility(),
+                clip.getCreatedAt(),
+                clip.getUpdatedAt(),
+
+                clipService.countLikes(clip),
+                clipService.countComments(clip),
+                clipService.hasLiked(email, clip)
+        );
+    }
+
 }

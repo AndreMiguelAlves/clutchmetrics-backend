@@ -30,6 +30,7 @@ public class ClipResponse {
 
     private long likeCount;
     private long commentCount;
+    private boolean likedByCurrentUser;
 
     public ClipResponse(
             Long id,
@@ -47,7 +48,8 @@ public class ClipResponse {
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             long likeCount,
-            long commentCount) {
+            long commentCount,
+            boolean likedByCurrentUser) {
 
         this.id = id;
         this.authorId = authorId;
@@ -65,6 +67,7 @@ public class ClipResponse {
         this.updatedAt = updatedAt;
         this.likeCount = likeCount;
         this.commentCount = commentCount;
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 
     public Long getId() {
@@ -129,5 +132,8 @@ public class ClipResponse {
 
     public long getCommentCount() {
         return commentCount;
+    }
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
     }
 }

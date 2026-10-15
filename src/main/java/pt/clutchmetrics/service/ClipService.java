@@ -449,6 +449,23 @@ public class ClipService {
                 .countByClip(clip);
     }
 
+    @Transactional(readOnly = true)
+    public boolean hasLiked(String email, Clip clip) {
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Utilizador não encontrado."
+                        )
+                );
+
+        return clipLikeRepository.existsByClipAndUser(
+                clip,
+                user
+        );
+    }
+
     // =========================================================
     // PROCURAR CLIP DO PRÓPRIO UTILIZADOR
     // =========================================================
