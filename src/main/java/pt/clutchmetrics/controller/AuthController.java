@@ -20,6 +20,9 @@ import pt.clutchmetrics.dto.LogoutRequest;
 import pt.clutchmetrics.dto.ForgotPasswordRequest;
 import pt.clutchmetrics.dto.ResetPasswordRequest;
 import pt.clutchmetrics.dto.ChangePasswordRequest;
+import pt.clutchmetrics.dto.AuthMeResponse;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -92,12 +95,25 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> me(
+    public ResponseEntity<AuthMeResponse> me(
             Authentication authentication) {
 
+        List<String> roles =
+                authentication
+                        .getAuthorities()
+                        .stream()
+                        .map(authority ->
+                                authority
+                                        .getAuthority()
+                                        .replace("ROLE_", "")
+                        )
+                        .toList();
+
         return ResponseEntity.ok(
-                "Autenticado como: " +
-                        authentication.getName()
+                new AuthMeResponse(
+                        authentication.getName(),
+                        roles
+                )
         );
     }
 
