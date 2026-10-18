@@ -9,6 +9,7 @@ import pt.clutchmetrics.dto.DashboardEvolutionPointResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class DashboardService {
@@ -23,7 +24,8 @@ public class DashboardService {
 
     public DashboardSummaryResponse getSummary(
             String email,
-            GameCode gameCode) {
+            GameCode gameCode,
+            Integer days) {
 
         List<MatchResponse> matches =
                 gameMatchService.getMyMatches(
@@ -31,6 +33,8 @@ public class DashboardService {
                         gameCode,
                         null
                 );
+
+        matches = filterByDays(matches, days);
 
         long totalMatches = matches.size();
 
@@ -94,7 +98,8 @@ public class DashboardService {
     public List<DashboardEvolutionPointResponse> getEvolution(
             String email,
             GameCode gameCode,
-            int limit) {
+            int limit,
+            Integer days) {
 
         List<MatchResponse> matches =
                 gameMatchService.getMyMatches(
@@ -102,6 +107,8 @@ public class DashboardService {
                         gameCode,
                         null
                 );
+
+        matches = filterByDays(matches, days);
 
         List<MatchResponse> limitedMatches =
                 matches.stream()
@@ -125,6 +132,26 @@ public class DashboardService {
                                 match.getDeaths(),
                                 match.getAssists()
                         )
+                )
+                .toList();
+    }
+
+    private List<MatchResponse> filterByDays(
+            List<MatchResponse> matches,
+            Integer days) {
+
+        if (days == null || days <= 0) {
+            return matches;
+        }
+
+        LocalDateTime cutoff =
+                LocalDateTime.now().minusDays(days);
+
+        return matches.stream()
+                .filter(match ->
+                        match.getPlayedAt() != null
+                                && !match.getPlayedAt()
+                                .isBefore(cutoff)
                 )
                 .toList();
     }
