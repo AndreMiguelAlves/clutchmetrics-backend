@@ -240,6 +240,17 @@ public class ClipService {
                 );
     }
 
+    @Transactional(readOnly = true)
+    public List<Clip> getPublicClipsByUserId(Long userId) {
+
+        return getFeed()
+                .stream()
+                .filter(clip ->
+                        clip.getUser().getId().equals(userId)
+                )
+                .toList();
+    }
+
     // =========================================================
     // LIKE
     // =========================================================
@@ -465,6 +476,38 @@ public class ClipService {
                 user
         );
     }
+
+
+
+    @Transactional
+    public void deleteClip(String email, Long clipId) {
+
+        // Confirmar que o clip pertence ao utilizador
+        Clip clip = getOwnedClip(email, clipId);
+
+        // Guardar os dados necessários para a auditoria
+        User user = clip.getUser();
+        Long deletedClipId = clip.getId();
+        String deletedClipTitle = clip.getTitle();
+
+        // Eliminar likes e comentários associados
+        clipLikeRepository.deleteAllByClip(clip);
+        clipCommentRepository.deleteAllByClip(clip);
+
+        // Eliminar o clip
+        clipRepository.delete(clip);
+
+        // Registar a eliminação nos Audit Logs
+        auditService.log(
+                user,
+                AuditAction.CLIP_DELETED,
+                "CLIP",
+                deletedClipId,
+                "Deleted clip \"" + deletedClipTitle + "\""
+        );
+    }
+
+
 
     // =========================================================
     // PROCURAR CLIP DO PRÓPRIO UTILIZADOR

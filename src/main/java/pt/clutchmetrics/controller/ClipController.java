@@ -11,6 +11,7 @@ import pt.clutchmetrics.dto.CreateClipCommentRequest;
 import pt.clutchmetrics.dto.CreateClipRequest;
 import pt.clutchmetrics.entity.Clip;
 import pt.clutchmetrics.service.ClipService;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -115,6 +116,22 @@ public class ClipController {
         return ResponseEntity.ok(response);
     }
 
+
+    @GetMapping("/players/{userId}")
+    public ResponseEntity<List<ClipResponse>> getPublicClipsByPlayer(
+            @PathVariable Long userId
+    ) {
+
+        List<ClipResponse> response = clipService
+                .getPublicClipsByUserId(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+
     @PostMapping("/{clipId}/like")
     public ResponseEntity<String> likeClip(
             Authentication authentication,
@@ -144,6 +161,22 @@ public class ClipController {
                 "Like removido com sucesso."
         );
     }
+
+
+    @DeleteMapping("/{clipId}")
+    public ResponseEntity<Void> deleteClip(
+            Authentication authentication,
+            @PathVariable Long clipId
+    ) {
+
+        clipService.deleteClip(
+                authentication.getName(),
+                clipId
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping("/{clipId}/comments")
     public ResponseEntity<ClipCommentResponse> addComment(

@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pt.clutchmetrics.entity.Clip;
 import pt.clutchmetrics.entity.ClipComment;
 import pt.clutchmetrics.entity.User;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +28,7 @@ public interface ClipCommentRepository
     long countByClip(
             Clip clip
     );
+    @Modifying
+    @Query("DELETE FROM ClipComment c WHERE c.clip = :clip")
+    void deleteAllByClip(@Param("clip") Clip clip);
 }

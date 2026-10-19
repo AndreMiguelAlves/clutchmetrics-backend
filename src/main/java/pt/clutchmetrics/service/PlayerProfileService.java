@@ -8,6 +8,7 @@ import pt.clutchmetrics.entity.User;
 import pt.clutchmetrics.exception.PlayerProfileNotFoundException;
 import pt.clutchmetrics.repository.PlayerProfileRepository;
 import pt.clutchmetrics.repository.UserRepository;
+import pt.clutchmetrics.dto.PublicPlayerProfileResponse;
 
 @Service
 public class PlayerProfileService {
@@ -78,4 +79,26 @@ public class PlayerProfileService {
 
         return playerProfileRepository.save(profile);
     }
+
+
+    @Transactional(readOnly = true)
+    public PublicPlayerProfileResponse getPublicProfileByUserId(Long userId) {
+
+        PlayerProfile profile = playerProfileRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new PlayerProfileNotFoundException(
+                                "Perfil de jogador não encontrado."
+                        )
+                );
+
+        return new PublicPlayerProfileResponse(
+                profile.getUser().getId(),
+                profile.getUser().getUsername(),
+                profile.getDisplayName(),
+                profile.getBio(),
+                profile.getAvatarUrl()
+        );
+    }
+
 }
