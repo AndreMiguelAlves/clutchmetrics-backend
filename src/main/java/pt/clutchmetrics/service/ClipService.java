@@ -28,6 +28,9 @@ import pt.clutchmetrics.repository.GameRepository;
 import pt.clutchmetrics.repository.UserRepository;
 import pt.clutchmetrics.audit.AuditAction;
 import pt.clutchmetrics.audit.AuditService;
+import pt.clutchmetrics.repository.ClipReportRepository;
+import pt.clutchmetrics.entity.ClipReportStatus;
+import pt.clutchmetrics.entity.ClipReport;
 
 import java.util.List;
 
@@ -40,6 +43,7 @@ public class ClipService {
     private final ClipLikeRepository clipLikeRepository;
     private final ClipCommentRepository clipCommentRepository;
     private final AuditService auditService;
+    private final ClipReportRepository clipReportRepository;
 
     public ClipService(
             ClipRepository clipRepository,
@@ -47,7 +51,8 @@ public class ClipService {
             GameRepository gameRepository,
             ClipLikeRepository clipLikeRepository,
             AuditService auditService,
-            ClipCommentRepository clipCommentRepository) {
+            ClipCommentRepository clipCommentRepository,
+            ClipReportRepository clipReportRepository) {
 
         this.clipRepository = clipRepository;
         this.userRepository = userRepository;
@@ -55,6 +60,7 @@ public class ClipService {
         this.clipLikeRepository = clipLikeRepository;
         this.clipCommentRepository = clipCommentRepository;
         this.auditService = auditService;
+        this.clipReportRepository = clipReportRepository;
     }
 
     // =========================================================
@@ -187,6 +193,22 @@ public class ClipService {
                     "O clip tem de estar READY antes de ser publicado."
             );
         }
+
+
+        // Verificar se o clip foi removido pela moderação
+        boolean removedByModeration = clipReportRepository
+                .findByClip(clip)
+                .stream()
+                .anyMatch(report ->
+                        report.getStatus() == ClipReportStatus.RESOLVED
+                );
+
+        if (removedByModeration) {
+            throw new InvalidClipStateException(
+                    "This clip was removed by moderation and cannot be published again."
+            );
+        }
+
 
         clip.setVisibility(
                 ClipVisibility.PUBLIC
@@ -493,6 +515,15 @@ public class ClipService {
         // Eliminar likes e comentários associados
         clipLikeRepository.deleteAllByClip(clip);
         clipCommentRepository.deleteAllByClip(clip);
+
+        // Desassociar as denúncias antes de eliminar o clip
+        for (ClipReport report : clipReportRepository.findByClip(clip)) {
+            report.setClip(null);
+        }
+
+// Guardar a alteração das relações na base de dados
+        clipReportRepository.flush();
+
 
         // Eliminar o clip
         clipRepository.delete(clip);

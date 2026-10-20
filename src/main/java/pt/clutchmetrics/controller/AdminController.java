@@ -14,6 +14,8 @@ import pt.clutchmetrics.dto.UpdateUserRolesRequest;
 import pt.clutchmetrics.dto.UpdateUserStatusRequest;
 
 import pt.clutchmetrics.service.AdminService;
+import pt.clutchmetrics.dto.ClipReportResponse;
+import pt.clutchmetrics.service.ClipReportService;
 
 import java.util.List;
 
@@ -23,14 +25,19 @@ public class AdminController {
 
     private final AuditService auditService;
     private final AdminService adminService;
+    private final ClipReportService clipReportService;
+
 
     public AdminController(
             AuditService auditService,
-            AdminService adminService) {
+            AdminService adminService,
+            ClipReportService clipReportService) {
 
         this.auditService = auditService;
         this.adminService = adminService;
+        this.clipReportService = clipReportService;
     }
+
 
     // =========================================================
     // AUDIT LOGS
@@ -107,4 +114,47 @@ public class AdminController {
                 )
         );
     }
+
+
+// ==========================================
+// CLIP REPORTS - MODERAÇÃO
+// ==========================================
+
+    // Consultar todas as denúncias
+    @GetMapping("/clip-reports")
+    public ResponseEntity<List<ClipReportResponse>> getClipReports() {
+
+        return ResponseEntity.ok(
+                clipReportService.getAllReports()
+        );
+    }
+
+    // Rejeitar uma denúncia
+    @PutMapping("/clip-reports/{reportId}/dismiss")
+    public ResponseEntity<ClipReportResponse> dismissClipReport(
+            Authentication authentication,
+            @PathVariable Long reportId) {
+
+        return ResponseEntity.ok(
+                clipReportService.dismissReport(
+                        authentication.getName(),
+                        reportId
+                )
+        );
+    }
+
+    // Resolver denúncia e ocultar o clip
+    @PutMapping("/clip-reports/{reportId}/resolve")
+    public ResponseEntity<ClipReportResponse> resolveClipReport(
+            Authentication authentication,
+            @PathVariable Long reportId) {
+
+        return ResponseEntity.ok(
+                clipReportService.resolveReport(
+                        authentication.getName(),
+                        reportId
+                )
+        );
+    }
+
 }

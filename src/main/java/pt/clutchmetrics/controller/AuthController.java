@@ -21,6 +21,8 @@ import pt.clutchmetrics.dto.ForgotPasswordRequest;
 import pt.clutchmetrics.dto.ResetPasswordRequest;
 import pt.clutchmetrics.dto.ChangePasswordRequest;
 import pt.clutchmetrics.dto.AuthMeResponse;
+import java.net.URI;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -60,16 +62,23 @@ public class AuthController {
                 .body(response);
     }
 
+
     @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(
+    public ResponseEntity<Void> verifyEmail(
             @RequestParam String token) {
 
+        // Validar o token e confirmar a conta
         authService.verifyEmail(token);
 
-        return ResponseEntity.ok(
-                "Conta confirmada com sucesso."
-        );
+        // Redirecionar para o Login do ClutchMetrics
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(
+                        "http://localhost:3000/login?verified=success"
+                ))
+                .build();
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(

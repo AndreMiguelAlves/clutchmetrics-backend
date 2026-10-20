@@ -4,9 +4,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import pt.clutchmetrics.entity.GameCode;
+import jakarta.validation.constraints.NotNull;
 
 public class CreateClipRequest {
 
+    @NotNull(message = "O jogo é obrigatório.")
     private GameCode gameCode;
 
     @NotBlank(message = "O título é obrigatório")
