@@ -63,13 +63,20 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/players/*").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/clips/players/*")
-                        .permitAll()
 
-                        .requestMatchers("/api/admin/**")
-                        .hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/clips/players/*")
+                                .permitAll()
 
-                        .anyRequest()
+                                // Permitir pedidos de reprodução dos clips.
+                                // A visibilidade é verificada pelo ClipService.
+                                .requestMatchers(HttpMethod.GET, "/api/clips/*/video")
+                                .permitAll()
+
+                                .requestMatchers("/api/admin/**")
+                                .hasRole("ADMIN")
+
+
+                                .anyRequest()
                         .authenticated()
                 )
 

@@ -163,6 +163,21 @@ public class VideoProcessingService {
         }
     }
 
+
+    public int getProcessedVideoDuration(String processedFileName) {
+
+        // 1. Localizar o MP4 processado
+        Path videoPath = videoStorageService
+                .getProcessedVideoPath(processedFileName);
+
+        // 2. Obter a duração real através do FFprobe
+        double duration = getVideoDuration(videoPath);
+
+        // 3. Converter para segundos inteiros
+        return Math.max(1, (int) Math.round(duration));
+    }
+
+
     private double getVideoDuration(Path videoPath) {
 
         Path logFile;

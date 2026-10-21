@@ -26,6 +26,12 @@ public class Clip {
     @Column(length = 1000)
     private String description;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "video_asset_id")
+    private VideoAsset videoAsset;
+
+
     @Column(name = "video_url", nullable = false, length = 500)
     private String videoUrl;
 
@@ -156,4 +162,14 @@ public class Clip {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+
+    public VideoAsset getVideoAsset() {
+        return videoAsset;
+    }
+
+    public void setVideoAsset(VideoAsset videoAsset) {
+        this.videoAsset = videoAsset;
+    }
+
 }

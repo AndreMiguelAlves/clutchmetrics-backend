@@ -63,6 +63,30 @@ public class VideoAssetService {
                     fileName
             );
 
+
+            // Obter o nome original do ficheiro enviado
+            String uploadedFileName = file.getOriginalFilename();
+
+// Evitar nomes vazios
+            if (uploadedFileName == null || uploadedFileName.isBlank()) {
+                uploadedFileName = "Uploaded video.mp4";
+            }
+
+// Remover eventuais caminhos incluídos no nome
+            uploadedFileName = uploadedFileName.replace('\\', '/');
+            uploadedFileName = uploadedFileName.substring(
+                    uploadedFileName.lastIndexOf('/') + 1
+            );
+
+// Respeitar o limite de 255 caracteres da base de dados
+            if (uploadedFileName.length() > 255) {
+                uploadedFileName = uploadedFileName.substring(0, 255);
+            }
+
+// Guardar o nome visível para o utilizador
+            videoAsset.setUploadedFileName(uploadedFileName);
+
+
             // 4. Guardar a associação na base de dados
             return videoAssetRepository
                     .saveAndFlush(videoAsset);
@@ -200,7 +224,7 @@ public class VideoAssetService {
 
     public List<VideoAssetResponse> getMyVideos(String email) {
 
-        // 1. Identificar o utilizador autenticado
+        // Identificar o utilizador autenticado
         User user = userRepository
                 .findByEmail(email)
                 .orElseThrow(() ->
@@ -210,19 +234,22 @@ public class VideoAssetService {
                         )
                 );
 
-        // 2. Consultar os vídeos que pertencem ao utilizador
+        // Consultar os vídeos pertencentes ao utilizador
         List<VideoAsset> videos = videoAssetRepository
                 .findByUser_IdOrderByCreatedAtDesc(user.getId());
 
-        // 3. Converter as entidades em DTOs
+        // Converter as entidades em DTOs
+
         return videos.stream()
                 .map(video -> new VideoAssetResponse(
                         video.getId(),
                         video.getProcessedFileName() != null
                                 && !video.getProcessedFileName().isBlank(),
-                        video.getCreatedAt()
+                        video.getCreatedAt(),
+                        video.getUploadedFileName()
                 ))
                 .toList();
+
     }
 
 }

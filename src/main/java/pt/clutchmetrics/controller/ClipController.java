@@ -12,6 +12,14 @@ import pt.clutchmetrics.dto.CreateClipRequest;
 import pt.clutchmetrics.entity.Clip;
 import pt.clutchmetrics.service.ClipService;
 import org.springframework.web.bind.annotation.PathVariable;
+import pt.clutchmetrics.dto.CreateClipFromVideoRequest;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+
+import java.nio.file.Path;
 
 import java.util.List;
 
@@ -39,6 +47,23 @@ public class ClipController {
                 .status(HttpStatus.CREATED)
                 .body(toResponse(clip));
     }
+
+
+    @PostMapping("/from-video")
+    public ResponseEntity<ClipResponse> createClipFromVideo(
+            Authentication authentication,
+            @Valid @RequestBody CreateClipFromVideoRequest request) {
+
+        Clip clip = clipService.createClipFromVideo(
+                authentication.getName(),
+                request
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(toResponse(clip));
+    }
+
 
     @GetMapping("/me")
     public ResponseEntity<List<ClipResponse>> getMyClips(
@@ -220,6 +245,40 @@ public class ClipController {
                 "Comentário eliminado com sucesso."
         );
     }
+
+
+    @GetMapping("/{clipId}/video")
+    public ResponseEntity<Resource> streamClipVideo(
+            Authentication authentication,
+            @PathVariable Long clipId) {
+
+        // 1. Identificar o utilizador, caso esteja autenticado
+        String viewerEmail = null;
+
+        if (authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
+
+            viewerEmail = authentication.getName();
+        }
+
+        // 2. Verificar as permissões e localizar o vídeo
+        Path videoPath = clipService.getClipVideoPath(
+                clipId,
+                viewerEmail
+        );
+
+        // 3. Preparar o ficheiro para reprodução
+        Resource resource = new FileSystemResource(videoPath);
+
+        // 4. Devolver o MP4 para o leitor de vídeo
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("video/mp4"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(resource);
+    }
+
 
     private ClipResponse toResponse(Clip clip) {
 

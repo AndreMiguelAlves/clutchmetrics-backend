@@ -152,17 +152,6 @@ public class VideoUploadController {
     public ResponseEntity<List<VideoAssetResponse>> getMyVideos(
             Authentication authentication) {
 
-        // Confirmar que o utilizador está autenticado
-        if (authentication == null ||
-                !authentication.isAuthenticated() ||
-                authentication instanceof AnonymousAuthenticationToken) {
-
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .build();
-        }
-
-        // Consultar os vídeos do utilizador autenticado
         List<VideoAssetResponse> videos =
                 videoAssetService.getMyVideos(
                         authentication.getName()

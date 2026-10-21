@@ -32,6 +32,16 @@ import pt.clutchmetrics.repository.ClipReportRepository;
 import pt.clutchmetrics.entity.ClipReportStatus;
 import pt.clutchmetrics.entity.ClipReport;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import pt.clutchmetrics.dto.CreateClipFromVideoRequest;
+import pt.clutchmetrics.entity.VideoAsset;
+import pt.clutchmetrics.repository.VideoAssetRepository;
+import java.nio.file.Path;
+
+
 import java.util.List;
 
 @Service
@@ -44,6 +54,11 @@ public class ClipService {
     private final ClipCommentRepository clipCommentRepository;
     private final AuditService auditService;
     private final ClipReportRepository clipReportRepository;
+    private final VideoAssetRepository videoAssetRepository;
+    private final VideoStorageService videoStorageService;
+    private final String appBaseUrl;
+    private final VideoProcessingService videoProcessingService;
+
 
     public ClipService(
             ClipRepository clipRepository,
@@ -52,7 +67,13 @@ public class ClipService {
             ClipLikeRepository clipLikeRepository,
             AuditService auditService,
             ClipCommentRepository clipCommentRepository,
-            ClipReportRepository clipReportRepository) {
+            ClipReportRepository clipReportRepository,
+            VideoAssetRepository videoAssetRepository,
+            VideoStorageService videoStorageService,
+            VideoProcessingService videoProcessingService,
+            @Value("${app.base-url}") String appBaseUrl
+    ) {
+
 
         this.clipRepository = clipRepository;
         this.userRepository = userRepository;
@@ -61,7 +82,12 @@ public class ClipService {
         this.clipCommentRepository = clipCommentRepository;
         this.auditService = auditService;
         this.clipReportRepository = clipReportRepository;
+        this.videoAssetRepository = videoAssetRepository;
+        this.appBaseUrl = appBaseUrl;
+        this.videoStorageService = videoStorageService;
+        this.videoProcessingService = videoProcessingService;
     }
+
 
     // =========================================================
     // CRIAR CLIP
@@ -116,6 +142,98 @@ public class ClipService {
 
         return clipRepository.save(clip);
     }
+
+
+    @Transactional
+    public Clip createClipFromVideo(
+            String email,
+            CreateClipFromVideoRequest request) {
+
+        // 1. Identificar o utilizador autenticado
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "User not found."
+                        )
+                );
+
+        // 2. Verificar se o vídeo pertence ao utilizador
+        VideoAsset videoAsset = videoAssetRepository
+                .findByIdAndUser_Id(
+                        request.getVideoAssetId(),
+                        user.getId()
+                )
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Video not found."
+                        )
+                );
+
+        // 3. Confirmar que o vídeo já foi processado
+        if (videoAsset.getProcessedFileName() == null ||
+                videoAsset.getProcessedFileName().isBlank()) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Video must be processed before creating a clip."
+            );
+        }
+
+        // 4. Identificar o jogo
+        Game game = gameRepository
+                .findByCode(request.getGameCode())
+                .orElseThrow(() ->
+                        new GameNotFoundException(
+                                "The selected game does not exist."
+                        )
+                );
+
+        // 5. Criar o Clip inicialmente privado
+        Clip clip = new Clip(
+                user,
+                game,
+                request.getTitle().trim(),
+                "pending"
+        );
+
+        clip.setVideoAsset(videoAsset);
+
+        clip.setDescription(
+                request.getDescription() != null
+                        ? request.getDescription().trim()
+                        : null
+        );
+
+
+// Obter automaticamente a duração real do MP4 processado
+        clip.setDurationSeconds(
+                videoProcessingService.getProcessedVideoDuration(
+                        videoAsset.getProcessedFileName()
+                )
+        );
+
+
+        // O MP4 já foi realmente processado pelo FFmpeg
+        clip.setStatus(ClipStatus.READY);
+
+        // 6. Guardar o Clip para obter o seu ID
+        Clip savedClip = clipRepository.saveAndFlush(clip);
+
+        // 7. Preparar o endereço de reprodução
+        String videoUrl = appBaseUrl.replaceAll("/+$", "")
+                + "/api/clips/"
+                + savedClip.getId()
+                + "/video";
+
+        savedClip.setVideoUrl(videoUrl);
+
+        // 8. Guardar o endereço definitivo
+        return clipRepository.saveAndFlush(savedClip);
+    }
+
 
     // =========================================================
     // LISTAR OS MEUS CLIPS
@@ -247,6 +365,70 @@ public class ClipService {
 
         return clipRepository.save(clip);
     }
+
+
+    @Transactional(readOnly = true)
+    public Path getClipVideoPath(
+            Long clipId,
+            String viewerEmail) {
+
+        // 1. Procurar o clip
+        Clip clip = clipRepository
+                .findById(clipId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Clip not found."
+                        )
+                );
+
+        // 2. Verificar se o clip está publicado
+        boolean isPublic =
+                clip.getStatus() == ClipStatus.READY &&
+                        clip.getVisibility() == ClipVisibility.PUBLIC;
+
+        // 3. Verificar se pertence ao utilizador autenticado
+        boolean isOwner =
+                viewerEmail != null &&
+                        clip.getUser().getEmail()
+                                .equalsIgnoreCase(viewerEmail);
+
+        // 4. Impedir acesso a clips privados de outros utilizadores
+        if (!isPublic && !isOwner) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Clip not found."
+            );
+        }
+
+        // 5. Confirmar que está associado a um VideoAsset
+        VideoAsset videoAsset = clip.getVideoAsset();
+
+        if (videoAsset == null ||
+                !videoAsset.getUser().getId()
+                        .equals(clip.getUser().getId()) ||
+                videoAsset.getProcessedFileName() == null ||
+                videoAsset.getProcessedFileName().isBlank()) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Processed video not found."
+            );
+        }
+
+        // 6. Localizar o MP4 no armazenamento
+        try {
+            return videoStorageService.getProcessedVideoPath(
+                    videoAsset.getProcessedFileName()
+            );
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Processed video not found."
+            );
+        }
+    }
+
 
     // =========================================================
     // FEED

@@ -25,6 +25,11 @@ public class VideoAsset {
     )
     private String originalFileName;
 
+
+    @Column(name = "uploaded_file_name", length = 255)
+    private String uploadedFileName;
+
+
     @Column(name = "processed_file_name", length = 60)
     private String processedFileName;
 
@@ -69,5 +74,14 @@ public class VideoAsset {
     public void setProcessedFileName(String processedFileName) {
         this.processedFileName = processedFileName;
     }
+
+    public String getUploadedFileName() {
+        return uploadedFileName;
+    }
+
+    public void setUploadedFileName(String uploadedFileName) {
+        this.uploadedFileName = uploadedFileName;
+    }
+
 
 }

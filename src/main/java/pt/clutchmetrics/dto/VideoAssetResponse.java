@@ -8,15 +8,18 @@ public class VideoAssetResponse {
     private final Long id;
     private final boolean processed;
     private final LocalDateTime createdAt;
+    private final String uploadedFileName;
 
     public VideoAssetResponse(
             Long id,
             boolean processed,
-            LocalDateTime createdAt) {
+            LocalDateTime createdAt,
+            String uploadedFileName) {
 
         this.id = id;
         this.processed = processed;
         this.createdAt = createdAt;
+        this.uploadedFileName = uploadedFileName;
     }
 
     public Long getId() {
@@ -29,6 +32,10 @@ public class VideoAssetResponse {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getUploadedFileName() {
+        return uploadedFileName;
     }
 }
 
