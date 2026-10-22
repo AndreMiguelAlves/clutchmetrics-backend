@@ -160,4 +160,38 @@ public class VideoUploadController {
         return ResponseEntity.ok(videos);
     }
 
+    @GetMapping("/{videoAssetId}/original")
+    public ResponseEntity<Resource> getOriginalVideo(
+            Authentication authentication,
+            @PathVariable Long videoAssetId) {
+
+        // Recuperar o vídeo original do utilizador autenticado
+        Path videoPath = videoAssetService.getOriginalVideoForUser(
+                authentication.getName(),
+                videoAssetId
+        );
+
+        // Preparar o ficheiro para reprodução no navegador
+        Resource resource = new FileSystemResource(videoPath);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("video/mp4"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(resource);
+    }
+
+    @DeleteMapping("/{videoAssetId}")
+    public ResponseEntity<Void> deleteVideo(
+            Authentication authentication,
+            @PathVariable Long videoAssetId) {
+
+        videoAssetService.deleteVideo(
+                authentication.getName(),
+                videoAssetId
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

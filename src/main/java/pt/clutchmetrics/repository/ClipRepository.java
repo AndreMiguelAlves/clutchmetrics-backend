@@ -46,4 +46,7 @@ public interface ClipRepository
             ClipVisibility visibility,
             ClipStatus status
     );
+
+    boolean existsByVideoAsset_Id(Long videoAssetId);
+
 }

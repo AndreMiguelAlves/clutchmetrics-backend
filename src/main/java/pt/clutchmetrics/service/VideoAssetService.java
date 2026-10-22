@@ -15,6 +15,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import pt.clutchmetrics.dto.VideoAssetResponse;
 import java.util.List;
+import pt.clutchmetrics.repository.ClipRepository;
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class VideoAssetService {
@@ -23,16 +30,21 @@ public class VideoAssetService {
     private final VideoAssetRepository videoAssetRepository;
     private final VideoStorageService videoStorageService;
     private final VideoProcessingService videoProcessingService;
+    private final ClipRepository clipRepository;
+    private static final Logger log =
+            LoggerFactory.getLogger(VideoAssetService.class);
 
 
     public VideoAssetService(
             UserRepository userRepository,
             VideoAssetRepository videoAssetRepository,
+            ClipRepository clipRepository,
             VideoStorageService videoStorageService,
             VideoProcessingService videoProcessingService) {
 
         this.userRepository = userRepository;
         this.videoAssetRepository = videoAssetRepository;
+        this.clipRepository = clipRepository;
         this.videoStorageService = videoStorageService;
         this.videoProcessingService = videoProcessingService;
     }
@@ -222,6 +234,41 @@ public class VideoAssetService {
                 .getProcessedVideoPath(processedFileName);
     }
 
+
+    public Path getOriginalVideoForUser(
+            String email,
+            Long videoAssetId) {
+
+        // Identificar o utilizador autenticado
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "User not found."
+                        )
+                );
+
+        // Garantir que o vídeo pertence ao utilizador
+        VideoAsset videoAsset = videoAssetRepository
+                .findByIdAndUser_Id(
+                        videoAssetId,
+                        user.getId()
+                )
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Video not found."
+                        )
+                );
+
+        // Localizar o MP4 original no armazenamento
+        return videoStorageService.getOriginalVideoPath(
+                videoAsset.getOriginalFileName()
+        );
+    }
+
+
     public List<VideoAssetResponse> getMyVideos(String email) {
 
         // Identificar o utilizador autenticado
@@ -250,6 +297,86 @@ public class VideoAssetService {
                 ))
                 .toList();
 
+    }
+
+    @Transactional
+    public void deleteVideo(String email, Long videoAssetId) {
+
+        // 1. Identificar o utilizador autenticado
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "User not found."
+                        )
+                );
+
+        // 2. Confirmar que o vídeo pertence ao utilizador
+        VideoAsset video = videoAssetRepository
+                .findByIdAndUser_Id(videoAssetId, user.getId())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Video not found."
+                        )
+                );
+
+        // 3. Impedir a eliminação de vídeos usados em Clips
+        if (clipRepository.existsByVideoAsset_Id(videoAssetId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "This video is associated with one or more clips."
+            );
+        }
+
+        // 4. Guardar os nomes dos ficheiros antes de apagar o registo
+        String originalFileName = video.getOriginalFileName();
+        String processedFileName = video.getProcessedFileName();
+
+        // 5. Eliminar o registo da base de dados
+        videoAssetRepository.delete(video);
+        videoAssetRepository.flush();
+
+        // 6. Remover os ficheiros apenas depois do commit da BD
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCommit() {
+
+                        try {
+                            Files.deleteIfExists(
+                                    videoStorageService.getOriginalVideoPath(
+                                            originalFileName
+                                    )
+                            );
+                        } catch (IOException | RuntimeException exception) {
+                            log.error(
+                                    "Could not delete original video: {}",
+                                    originalFileName,
+                                    exception
+                            );
+                        }
+
+                        if (processedFileName != null &&
+                                !processedFileName.isBlank()) {
+
+                            try {
+                                videoStorageService.deleteProcessedVideo(
+                                        processedFileName
+                                );
+                            } catch (IOException | RuntimeException exception) {
+                                log.error(
+                                        "Could not delete processed video: {}",
+                                        processedFileName,
+                                        exception
+                                );
+                            }
+                        }
+                    }
+                }
+        );
     }
 
 }
