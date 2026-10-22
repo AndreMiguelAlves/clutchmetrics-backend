@@ -1,0 +1,990 @@
+{
+  "info": {
+    "name": "ClutchMetrics - KDA Match Data (October 2026)",
+    "description": "20 example matches (10 League of Legends, 10 Valorant) for KDA graphs. Use Run on one folder at a time. Uses the existing POST /api/matches backend API. First set collection variables: accessToken (JWT), valorantAccountId (from GET /api/game-accounts). LoL account ID is confirmed 1. DO NOT run repeatedly; externalMatchIds are fixed and should be unique.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lolAccountId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "valorantAccountId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0 - Check account IDs (run first)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/game-accounts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "game-accounts"
+          ]
+        },
+        "description": "Find the Valorant player game account ID in the response and set collection variable valorantAccountId."
+      }
+    },
+    {
+      "name": "1 - League of Legends (10 matches)",
+      "description": "Confirmed playerGameAccountId=1. Run this folder once.",
+      "item": [
+        {
+          "name": "01 | 2026-10-13 | WIN | KDA 6.75",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-01\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-13T20:15:00\",\n  \"durationSeconds\": 2180,\n  \"kills\": 15,\n  \"deaths\": 4,\n  \"assists\": 12,\n  \"score\": 3120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-13. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 | 2026-10-14 | LOSS | KDA 1.11",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-02\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-14T19:10:00\",\n  \"durationSeconds\": 1860,\n  \"kills\": 4,\n  \"deaths\": 9,\n  \"assists\": 6,\n  \"score\": 1560\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-14. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 | 2026-10-15 | WIN | KDA 7.00",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-03\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-15T21:05:00\",\n  \"durationSeconds\": 2030,\n  \"kills\": 11,\n  \"deaths\": 3,\n  \"assists\": 10,\n  \"score\": 2850\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-15. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 | 2026-10-16 | LOSS | KDA 1.50",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-04\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-16T18:50:00\",\n  \"durationSeconds\": 1940,\n  \"kills\": 7,\n  \"deaths\": 8,\n  \"assists\": 5,\n  \"score\": 1820\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-16. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 | 2026-10-17 | WIN | KDA 5.40",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-05\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-17T22:00:00\",\n  \"durationSeconds\": 2240,\n  \"kills\": 18,\n  \"deaths\": 5,\n  \"assists\": 9,\n  \"score\": 3550\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-17. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 | 2026-10-18 | LOSS | KDA 0.88",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-06\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-18T17:25:00\",\n  \"durationSeconds\": 1760,\n  \"kills\": 3,\n  \"deaths\": 8,\n  \"assists\": 4,\n  \"score\": 1410\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-18. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 | 2026-10-19 | WIN | KDA 4.80",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-07\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-19T20:35:00\",\n  \"durationSeconds\": 2110,\n  \"kills\": 10,\n  \"deaths\": 5,\n  \"assists\": 14,\n  \"score\": 2980\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-19. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 | 2026-10-20 | LOSS | KDA 1.30",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-08\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-20T19:45:00\",\n  \"durationSeconds\": 1980,\n  \"kills\": 6,\n  \"deaths\": 10,\n  \"assists\": 7,\n  \"score\": 1770\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-20. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 | 2026-10-21 | WIN | KDA 7.50",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-09\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-21T21:30:00\",\n  \"durationSeconds\": 2270,\n  \"kills\": 14,\n  \"deaths\": 4,\n  \"assists\": 16,\n  \"score\": 3420\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-21. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 | 2026-10-22 | LOSS | KDA 1.44",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{lolAccountId}},\n  \"externalMatchId\": \"LOL-KDA-202610-10\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-22T09:10:00\",\n  \"durationSeconds\": 1890,\n  \"kills\": 5,\n  \"deaths\": 9,\n  \"assists\": 8,\n  \"score\": 1690\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, LOL, 2026-10-22. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 - Valorant (10 matches)",
+      "description": "Set valorantAccountId to the actual Valorant ID before running. Run this folder once.",
+      "item": [
+        {
+          "name": "01 | 2026-10-13 | LOSS | KDA 0.89",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-01\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-13T21:10:00\",\n  \"durationSeconds\": 2430,\n  \"kills\": 11,\n  \"deaths\": 18,\n  \"assists\": 5,\n  \"score\": 195\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-13. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 | 2026-10-14 | WIN | KDA 2.91",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-02\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-14T19:35:00\",\n  \"durationSeconds\": 2620,\n  \"kills\": 24,\n  \"deaths\": 11,\n  \"assists\": 8,\n  \"score\": 337\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-14. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 | 2026-10-15 | WIN | KDA 1.67",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-03\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-15T20:20:00\",\n  \"durationSeconds\": 2490,\n  \"kills\": 19,\n  \"deaths\": 15,\n  \"assists\": 6,\n  \"score\": 275\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-15. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 | 2026-10-16 | LOSS | KDA 0.63",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-04\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-16T22:15:00\",\n  \"durationSeconds\": 2260,\n  \"kills\": 8,\n  \"deaths\": 19,\n  \"assists\": 4,\n  \"score\": 161\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-16. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 | 2026-10-17 | WIN | KDA 3.17",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-05\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-17T18:05:00\",\n  \"durationSeconds\": 2830,\n  \"kills\": 29,\n  \"deaths\": 12,\n  \"assists\": 9,\n  \"score\": 390\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-17. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 | 2026-10-18 | LOSS | KDA 1.18",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-06\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-18T20:45:00\",\n  \"durationSeconds\": 2360,\n  \"kills\": 13,\n  \"deaths\": 17,\n  \"assists\": 7,\n  \"score\": 224\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-18. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 | 2026-10-19 | WIN | KDA 3.30",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-07\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-19T23:00:00\",\n  \"durationSeconds\": 2750,\n  \"kills\": 22,\n  \"deaths\": 10,\n  \"assists\": 11,\n  \"score\": 355\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-19. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 | 2026-10-20 | LOSS | KDA 0.75",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-08\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-20T18:55:00\",\n  \"durationSeconds\": 2300,\n  \"kills\": 9,\n  \"deaths\": 20,\n  \"assists\": 6,\n  \"score\": 173\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-20. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 | 2026-10-21 | WIN | KDA 2.57",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-09\",\n  \"result\": \"WIN\",\n  \"playedAt\": \"2026-10-21T21:40:00\",\n  \"durationSeconds\": 2780,\n  \"kills\": 26,\n  \"deaths\": 14,\n  \"assists\": 10,\n  \"score\": 364\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-21. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 | 2026-10-22 | LOSS | KDA 1.28",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerGameAccountId\": {{valorantAccountId}},\n  \"externalMatchId\": \"VAL-KDA-202610-10\",\n  \"result\": \"LOSS\",\n  \"playedAt\": \"2026-10-22T10:05:00\",\n  \"durationSeconds\": 2590,\n  \"kills\": 15,\n  \"deaths\": 18,\n  \"assists\": 8,\n  \"score\": 248\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matches"
+              ]
+            },
+            "description": "Demo statistics, VAL, 2026-10-22. POST to the real Spring Boot API; avoid rerunning to prevent duplicate externalMatchId entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Match created (201)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
