@@ -33,12 +33,6 @@ public class GameDataInitializer {
                     GameCode.CS2,
                     "Counter-Strike 2"
             );
-
-            createGameIfMissing(
-                    gameRepository,
-                    GameCode.ROCKET_LEAGUE,
-                    "Rocket League"
-            );
         };
     }
 

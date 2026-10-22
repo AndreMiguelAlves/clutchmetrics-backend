@@ -256,13 +256,11 @@ public class ChatbotService {
         if (normalized.contains("game account")
                 || normalized.contains("valorant")
                 || normalized.contains("league of legends")
-                || normalized.contains("rocket league")
                 || normalized.contains("cs2")) {
 
             return "You can manage your linked gaming accounts in "
                     + "the Game Accounts section. ClutchMetrics supports "
-                    + "League of Legends, Valorant, Counter-Strike 2, "
-                    + "and Rocket League.";
+                    + "League of Legends, Valorant, and Counter-Strike 2.";
         }
 
         // User account
