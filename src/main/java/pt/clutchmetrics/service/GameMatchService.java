@@ -71,6 +71,8 @@ public class GameMatchService {
                         request.getPlayedAt()
                 );
 
+        match.setCategory(request.getCategory());
+
         match.setExternalMatchId(
                 request.getExternalMatchId()
         );
@@ -194,6 +196,7 @@ public class GameMatchService {
         PlayerGameAccount gameAccount =
                 match.getPlayerGameAccount();
 
+
         return new MatchResponse(
                 match.getId(),
                 gameAccount.getId(),
@@ -202,6 +205,7 @@ public class GameMatchService {
                 gameAccount.getNickname(),
                 match.getExternalMatchId(),
                 match.getResult(),
+                match.getCategory(),
                 match.getPlayedAt(),
                 match.getDurationSeconds(),
                 kills,
@@ -210,5 +214,6 @@ public class GameMatchService {
                 score,
                 kda
         );
+
     }
 }

@@ -2,6 +2,7 @@ package pt.clutchmetrics.dto;
 
 import pt.clutchmetrics.entity.GameCode;
 import pt.clutchmetrics.entity.MatchResult;
+import pt.clutchmetrics.entity.MatchCategory;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ public class MatchResponse {
     private String nickname;
     private String externalMatchId;
     private MatchResult result;
+    private MatchCategory category;
     private LocalDateTime playedAt;
     private Integer durationSeconds;
 
@@ -32,6 +34,7 @@ public class MatchResponse {
             String nickname,
             String externalMatchId,
             MatchResult result,
+            MatchCategory category,
             LocalDateTime playedAt,
             Integer durationSeconds,
             Integer kills,
@@ -47,6 +50,7 @@ public class MatchResponse {
         this.nickname = nickname;
         this.externalMatchId = externalMatchId;
         this.result = result;
+        this.category = category;
         this.playedAt = playedAt;
         this.durationSeconds = durationSeconds;
         this.kills = kills;
@@ -82,6 +86,10 @@ public class MatchResponse {
 
     public MatchResult getResult() {
         return result;
+    }
+
+    public MatchCategory getCategory() {
+        return category;
     }
 
     public LocalDateTime getPlayedAt() {

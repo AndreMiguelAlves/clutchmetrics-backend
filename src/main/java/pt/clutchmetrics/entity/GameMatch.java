@@ -23,6 +23,10 @@ public class GameMatch {
     @Column(nullable = false, length = 20)
     private MatchResult result;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 20)
+    private MatchCategory category = MatchCategory.UNKNOWN;
+
     @Column(name = "played_at", nullable = false)
     private LocalDateTime playedAt;
 
@@ -72,6 +76,16 @@ public class GameMatch {
 
     public void setResult(MatchResult result) {
         this.result = result;
+    }
+
+    public MatchCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(MatchCategory category) {
+        this.category = category != null
+                ? category
+                : MatchCategory.UNKNOWN;
     }
 
     public LocalDateTime getPlayedAt() {

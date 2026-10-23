@@ -18,10 +18,26 @@ public class VideoProcessingService {
         this.videoStorageService = videoStorageService;
     }
 
+
     public String processVerticalVideo(
             String originalFileName,
             int startSeconds,
             int endSeconds) {
+
+        return processVerticalVideo(
+                originalFileName,
+                startSeconds,
+                endSeconds,
+                false
+        );
+    }
+
+    public String processVerticalVideo(
+            String originalFileName,
+            int startSeconds,
+            int endSeconds,
+            boolean fullHd) {
+
 
         // Validar o intervalo solicitado
         if (startSeconds < 0 || endSeconds <= startSeconds) {
@@ -54,14 +70,20 @@ public class VideoProcessingService {
         Path output = videoStorageService
                 .createProcessedVideoPath();
 
+
+        int targetWidth = fullHd ? 1080 : 720;
+        int targetHeight = fullHd ? 1920 : 1280;
+
         String videoFilter =
                 "[0:v]split=2[bg][fg];" +
-                        "[bg]scale=720:1280:" +
+                        "[bg]scale=" + targetWidth + ":" + targetHeight + ":" +
                         "force_original_aspect_ratio=increase," +
-                        "crop=720:1280,boxblur=20:1[blur];" +
-                        "[fg]scale=720:-2[front];" +
+                        "crop=" + targetWidth + ":" + targetHeight +
+                        ",boxblur=20:1[blur];" +
+                        "[fg]scale=" + targetWidth + ":-2[front];" +
                         "[blur][front]overlay=(W-w)/2:(H-h)/2," +
                         "setsar=1[v]";
+
 
         // Cada elemento é um argumento separado.
         List<String> command = List.of(

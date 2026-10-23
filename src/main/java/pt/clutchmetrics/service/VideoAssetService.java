@@ -30,6 +30,7 @@ public class VideoAssetService {
     private final VideoAssetRepository videoAssetRepository;
     private final VideoStorageService videoStorageService;
     private final VideoProcessingService videoProcessingService;
+    private final SubscriptionService subscriptionService;
     private final ClipRepository clipRepository;
     private static final Logger log =
             LoggerFactory.getLogger(VideoAssetService.class);
@@ -40,13 +41,15 @@ public class VideoAssetService {
             VideoAssetRepository videoAssetRepository,
             ClipRepository clipRepository,
             VideoStorageService videoStorageService,
-            VideoProcessingService videoProcessingService) {
+            VideoProcessingService videoProcessingService,
+            SubscriptionService subscriptionService) {
 
         this.userRepository = userRepository;
         this.videoAssetRepository = videoAssetRepository;
         this.clipRepository = clipRepository;
         this.videoStorageService = videoStorageService;
         this.videoProcessingService = videoProcessingService;
+        this.subscriptionService = subscriptionService;
     }
 
 
@@ -156,13 +159,25 @@ public class VideoAssetService {
             );
         }
 
-        // 4. Executar o FFmpeg
+
+        // 4. Verificar a subscrição do utilizador
+        var subscription =
+                subscriptionService.getMySubscription(email);
+
+        boolean fullHd =
+                subscription.isActive() &&
+                        subscription.getPlan().getCode()
+                                == pt.clutchmetrics.entity.PlanCode.PREMIUM;
+
+// 5. Processar o vídeo na resolução permitida
         String processedFileName =
                 videoProcessingService.processVerticalVideo(
                         videoAsset.getOriginalFileName(),
                         startSeconds,
-                        endSeconds
+                        endSeconds,
+                        fullHd
                 );
+
 
 
         // 5. Guardar o resultado na base de dados

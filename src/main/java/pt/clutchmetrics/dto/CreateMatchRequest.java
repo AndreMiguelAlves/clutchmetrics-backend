@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import pt.clutchmetrics.entity.MatchResult;
+import pt.clutchmetrics.entity.MatchCategory;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,8 @@ public class CreateMatchRequest {
 
     @NotNull(message = "O resultado da partida é obrigatório")
     private MatchResult result;
+
+    private MatchCategory category;
 
     @NotNull(message = "A data da partida é obrigatória")
     private LocalDateTime playedAt;
@@ -64,6 +67,14 @@ public class CreateMatchRequest {
 
     public void setResult(MatchResult result) {
         this.result = result;
+    }
+
+    public MatchCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(MatchCategory category) {
+        this.category = category;
     }
 
     public LocalDateTime getPlayedAt() {

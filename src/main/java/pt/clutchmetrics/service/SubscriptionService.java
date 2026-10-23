@@ -84,6 +84,44 @@ public class SubscriptionService {
                     );
         }
 
+
+        if (subscription.getPlan().getCode() == PlanCode.PREMIUM) {
+
+            LocalDateTime endsAt = subscription.getEndsAt();
+
+            boolean expired =
+                    endsAt == null ||
+                            !endsAt.isAfter(LocalDateTime.now());
+
+            if (expired) {
+
+                Plan freePlan = planRepository
+                        .findByCode(PlanCode.FREE)
+                        .orElseThrow(() ->
+                                new IllegalStateException(
+                                        "O plano FREE não existe."
+                                )
+                        );
+
+                subscription.setPlan(freePlan);
+                subscription.setStartedAt(LocalDateTime.now());
+                subscription.setEndsAt(null);
+                subscription.setAutoRenew(false);
+                subscription.setActive(true);
+
+                subscription = subscriptionRepository.save(subscription);
+
+                auditService.log(
+                        subscription.getUser(),
+                        AuditAction.SUBSCRIPTION_CHANGED,
+                        "Subscription",
+                        subscription.getId(),
+                        "Subscrição Premium expirada. Alterada automaticamente para FREE."
+                );
+            }
+        }
+
+
         return subscription;
     }
 
