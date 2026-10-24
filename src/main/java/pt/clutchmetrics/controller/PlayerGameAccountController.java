@@ -9,6 +9,7 @@ import pt.clutchmetrics.dto.CreatePlayerGameAccountRequest;
 import pt.clutchmetrics.dto.PlayerGameAccountResponse;
 import pt.clutchmetrics.entity.PlayerGameAccount;
 import pt.clutchmetrics.service.PlayerGameAccountService;
+import pt.clutchmetrics.dto.UpdatePlayerGameAccountRequest;
 
 import java.util.List;
 
@@ -54,6 +55,39 @@ public class PlayerGameAccountController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}/disconnect")
+    public ResponseEntity<PlayerGameAccountResponse> disconnect(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        PlayerGameAccount account =
+                playerGameAccountService.disconnect(
+                        authentication.getName(),
+                        id
+                );
+
+        return ResponseEntity.ok(
+                toResponse(account)
+        );
+    }
+
+
+    @PutMapping("/{id}/reconnect")
+    public ResponseEntity<PlayerGameAccountResponse> reconnect(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        PlayerGameAccount account =
+                playerGameAccountService.reconnect(
+                        authentication.getName(),
+                        id
+                );
+
+        return ResponseEntity.ok(
+                toResponse(account)
+        );
+    }
+
     private PlayerGameAccountResponse toResponse(
             PlayerGameAccount account) {
 
@@ -65,6 +99,7 @@ public class PlayerGameAccountController {
                 account.getExternalId(),
                 account.getRegion(),
                 account.getPlatform(),
+                account.isConnected(),
                 account.getCreatedAt(),
                 account.getUpdatedAt()
         );

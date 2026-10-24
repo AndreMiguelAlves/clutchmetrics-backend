@@ -40,6 +40,9 @@ public class PlayerGameAccount {
     @Column(length = 50)
     private String platform;
 
+    @Column(name = "connected")
+    private Boolean connected = true;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -119,5 +122,13 @@ public class PlayerGameAccount {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isConnected() {
+        return connected == null || connected;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 }

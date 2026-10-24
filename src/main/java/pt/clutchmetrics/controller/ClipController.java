@@ -18,7 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-
+import pt.clutchmetrics.dto.UpdateClipRequest;
 import java.nio.file.Path;
 
 import java.util.List;
@@ -64,6 +64,24 @@ public class ClipController {
                 .body(toResponse(clip));
     }
 
+    // =========================================================
+// EDITAR TÍTULO E DESCRIÇÃO DO CLIP
+// =========================================================
+
+    @PutMapping("/{clipId}")
+    public ResponseEntity<ClipResponse> updateClip(
+            Authentication authentication,
+            @PathVariable Long clipId,
+            @Valid @RequestBody UpdateClipRequest request) {
+
+        Clip clip = clipService.updateClip(
+                authentication.getName(),
+                clipId,
+                request
+        );
+
+        return ResponseEntity.ok(toResponse(clip));
+    }
 
     @GetMapping("/me")
     public ResponseEntity<List<ClipResponse>> getMyClips(

@@ -13,6 +13,7 @@ public class PlayerGameAccountResponse {
     private String externalId;
     private String region;
     private String platform;
+    private boolean connected;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -24,6 +25,7 @@ public class PlayerGameAccountResponse {
             String externalId,
             String region,
             String platform,
+            boolean connected,
             LocalDateTime createdAt,
             LocalDateTime updatedAt) {
 
@@ -34,6 +36,7 @@ public class PlayerGameAccountResponse {
         this.externalId = externalId;
         this.region = region;
         this.platform = platform;
+        this.connected = connected;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -64,6 +67,10 @@ public class PlayerGameAccountResponse {
 
     public String getPlatform() {
         return platform;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 
     public LocalDateTime getCreatedAt() {

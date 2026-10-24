@@ -31,6 +31,10 @@ public class Clip {
     @JoinColumn(name = "video_asset_id")
     private VideoAsset videoAsset;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "video_version", length = 20)
+    private ClipVideoVersion videoVersion;
+
 
     @Column(name = "video_url", nullable = false, length = 500)
     private String videoUrl;
@@ -172,4 +176,11 @@ public class Clip {
         this.videoAsset = videoAsset;
     }
 
+    public ClipVideoVersion getVideoVersion() {
+        return videoVersion;
+    }
+
+    public void setVideoVersion(ClipVideoVersion videoVersion) {
+        this.videoVersion = videoVersion;
+    }
 }

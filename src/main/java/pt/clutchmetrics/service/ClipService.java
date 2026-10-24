@@ -40,6 +40,7 @@ import pt.clutchmetrics.dto.CreateClipFromVideoRequest;
 import pt.clutchmetrics.entity.VideoAsset;
 import pt.clutchmetrics.repository.VideoAssetRepository;
 import java.nio.file.Path;
+import pt.clutchmetrics.dto.UpdateClipRequest;
 
 
 import java.util.List;
@@ -234,6 +235,33 @@ public class ClipService {
         return clipRepository.saveAndFlush(savedClip);
     }
 
+    // =========================================================
+// EDITAR TÍTULO E DESCRIÇÃO DO CLIP
+// =========================================================
+
+    @Transactional
+    public Clip updateClip(
+            String email,
+            Long clipId,
+            UpdateClipRequest request) {
+
+        // Procurar o clip e confirmar que pertence ao utilizador
+        Clip clip = getOwnedClip(email, clipId);
+
+        // Atualizar o título
+        clip.setTitle(request.getTitle().trim());
+
+        // Atualizar a descrição
+        clip.setDescription(
+                request.getDescription() != null
+                        && !request.getDescription().isBlank()
+                        ? request.getDescription().trim()
+                        : null
+        );
+
+        // Guardar as alterações
+        return clipRepository.save(clip);
+    }
 
     // =========================================================
     // LISTAR OS MEUS CLIPS
