@@ -16,6 +16,8 @@ import pt.clutchmetrics.entity.GameCode;
 import pt.clutchmetrics.entity.MatchResult;
 import pt.clutchmetrics.audit.AuditAction;
 import pt.clutchmetrics.audit.AuditService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -61,8 +63,29 @@ public class GameMatchService {
                         )
                         .orElseThrow(() ->
                                 new PlayerGameAccountNotFoundException(
-                                        "A conta de jogo não existe ou não pertence ao utilizador."
+                                        "The game account does not exist or does not belong to you."
                                 ));
+
+        // Verificar se a partida já foi registada nesta conta de jogo
+        String externalMatchId = request.getExternalMatchId();
+
+        if (externalMatchId != null && !externalMatchId.isBlank()) {
+
+            externalMatchId = externalMatchId.trim();
+
+            boolean alreadyExists = gameMatchRepository
+                    .existsByPlayerGameAccountAndExternalMatchId(
+                            gameAccount,
+                            externalMatchId
+                    );
+
+            if (alreadyExists) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "This match is already registered for this game account."
+                );
+            }
+        }
 
         GameMatch match =
                 new GameMatch(
@@ -73,9 +96,7 @@ public class GameMatchService {
 
         match.setCategory(request.getCategory());
 
-        match.setExternalMatchId(
-                request.getExternalMatchId()
-        );
+        match.setExternalMatchId(externalMatchId);
 
         match.setDurationSeconds(
                 request.getDurationSeconds()
@@ -105,7 +126,7 @@ public class GameMatchService {
                 AuditAction.MATCH_CREATED,
                 "GameMatch",
                 savedMatch.getId(),
-                "Partida criada com resultado: " + savedMatch.getResult()
+                "Match created with result: " + savedMatch.getResult() + "."
         );
 
         return toResponse(

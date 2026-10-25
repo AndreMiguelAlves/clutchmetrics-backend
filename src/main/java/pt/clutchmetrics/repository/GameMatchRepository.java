@@ -26,4 +26,8 @@ public interface GameMatchRepository
     List<GameMatch> findByPlayerGameAccount_PlayerProfileOrderByPlayedAtDesc(
             PlayerProfile playerProfile
     );
+    boolean existsByPlayerGameAccountAndExternalMatchId(
+            PlayerGameAccount playerGameAccount,
+            String externalMatchId
+    );
 }

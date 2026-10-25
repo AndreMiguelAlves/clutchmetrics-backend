@@ -46,7 +46,7 @@ public class SubscriptionService {
                 .findByCode(PlanCode.FREE)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "O plano FREE não existe."
+                                "The FREE plan does not exist."
                         ));
 
         Subscription subscription =
@@ -64,7 +64,7 @@ public class SubscriptionService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new SubscriptionNotFoundException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         )
                 );
 
@@ -79,7 +79,7 @@ public class SubscriptionService {
                     .findByUser(user)
                     .orElseThrow(() ->
                             new SubscriptionNotFoundException(
-                                    "Não foi possível criar a subscrição."
+                                    "Could not create the subscription."
                             )
                     );
         }
@@ -99,7 +99,7 @@ public class SubscriptionService {
                         .findByCode(PlanCode.FREE)
                         .orElseThrow(() ->
                                 new IllegalStateException(
-                                        "O plano FREE não existe."
+                                        "The FREE plan does not exist."
                                 )
                         );
 
@@ -116,7 +116,7 @@ public class SubscriptionService {
                         AuditAction.SUBSCRIPTION_CHANGED,
                         "Subscription",
                         subscription.getId(),
-                        "Subscrição Premium expirada. Alterada automaticamente para FREE."
+                        "Premium subscription expired. Automatically changed to FREE."
                 );
             }
         }
@@ -141,7 +141,7 @@ public class SubscriptionService {
 
         if (currentPlan.getCode() == newPlanCode) {
             throw new InvalidSubscriptionChangeException(
-                    "Já tens este plano ativo."
+                    "You already have this plan active."
             );
         }
 
@@ -149,12 +149,12 @@ public class SubscriptionService {
                 .findByCode(newPlanCode)
                 .orElseThrow(() ->
                         new InvalidSubscriptionChangeException(
-                                "O plano selecionado não existe."
+                                "The selected plan does not exist."
                         ));
 
         if (!newPlan.isActive()) {
             throw new InvalidSubscriptionChangeException(
-                    "O plano selecionado não está disponível."
+                    "The selected plan is not available."
             );
         }
 
@@ -183,12 +183,15 @@ public class SubscriptionService {
                 AuditAction.SUBSCRIPTION_CHANGED,
                 "Subscription",
                 savedSubscription.getId(),
-                "Subscrição alterada de "
+
+                "Subscription changed from "
                         + oldPlan
-                        + " para "
+                        + " to "
                         + savedSubscription.getPlan()
                         .getCode()
                         .name()
+                        + "."
+
         );
 
         return savedSubscription;

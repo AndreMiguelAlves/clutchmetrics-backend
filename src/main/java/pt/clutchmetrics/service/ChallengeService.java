@@ -53,19 +53,19 @@ public class ChallengeService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         Challenge challenge = challengeRepository
                 .findById(challengeId)
                 .orElseThrow(() ->
                         new ChallengeNotFoundException(
-                                "O challenge não existe."
+                                "Challenge not found."
                         ));
 
         if (challenge.getStatus() != ChallengeStatus.ACTIVE) {
             throw new InvalidChallengeStateException(
-                    "Este challenge não está ativo."
+                    "This challenge is not active."
             );
         }
 
@@ -86,7 +86,7 @@ public class ChallengeService {
                 )) {
 
             throw new DuplicateChallengeParticipationException(
-                    "Já estás a participar neste challenge."
+                    "You have already joined this challenge."
             );
         }
 
@@ -106,7 +106,7 @@ public class ChallengeService {
                 AuditAction.CHALLENGE_JOINED,
                 "Challenge",
                 challenge.getId(),
-                "Utilizador entrou no challenge: "
+                "User joined challenge: "
                         + challenge.getTitle()
         );
 
@@ -121,7 +121,7 @@ public class ChallengeService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         return participationRepository
@@ -138,7 +138,7 @@ public class ChallengeService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         List<ChallengeParticipation> participations =
@@ -160,6 +160,20 @@ public class ChallengeService {
             // Challenge ainda tem de estar dentro da data válida
             if (now.isBefore(challenge.getStartsAt())
                     || now.isAfter(challenge.getEndsAt())) {
+                continue;
+            }
+
+            // A partida deve ter sido disputada durante a participação
+            LocalDateTime playedAt = match.getPlayedAt();
+            LocalDateTime joinedAt = participation.getJoinedAt();
+
+            if (playedAt == null ||
+                    joinedAt == null ||
+                    playedAt.isBefore(joinedAt) ||
+                    playedAt.isBefore(challenge.getStartsAt()) ||
+                    playedAt.isAfter(challenge.getEndsAt()) ||
+                    playedAt.isAfter(now)) {
+
                 continue;
             }
 
@@ -222,7 +236,7 @@ public class ChallengeService {
                         AuditAction.CHALLENGE_COMPLETED,
                         "Challenge",
                         challenge.getId(),
-                        "Utilizador completou o challenge: "
+                        "User completed challenge: "
                                 + challenge.getTitle()
                 );
             }

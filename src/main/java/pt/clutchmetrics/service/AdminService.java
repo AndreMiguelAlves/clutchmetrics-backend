@@ -82,7 +82,7 @@ public class AdminService {
                 && Boolean.FALSE.equals(request.getEnabled())) {
 
             throw new InvalidAdminOperationException(
-                    "Não podes desativar a tua própria conta de administrador."
+                    "You cannot disable your own administrator account."
             );
         }
 
@@ -98,10 +98,11 @@ public class AdminService {
                 AuditAction.USER_STATUS_CHANGED,
                 "User",
                 savedUser.getId(),
-                "Estado do utilizador "
+                "Account "
                         + savedUser.getEmail()
-                        + " alterado para enabled="
-                        + savedUser.isEnabled()
+                        + (savedUser.isEnabled()
+                        ? " enabled."
+                        : " disabled.")
         );
 
         return toResponse(savedUser);
@@ -124,7 +125,7 @@ public class AdminService {
                 && !request.getRoles().contains(RoleName.ADMIN)) {
 
             throw new InvalidAdminOperationException(
-                    "Não podes remover o teu próprio role ADMIN."
+                    "You cannot remove your own ADMIN role."
             );
         }
 
@@ -136,7 +137,7 @@ public class AdminService {
                     .findByName(roleName)
                     .orElseThrow(() ->
                             new IllegalStateException(
-                                    "Role não encontrado: " + roleName
+                                    "Role not found: " + roleName
                             ));
 
             targetUser.addRole(role);
@@ -160,10 +161,11 @@ public class AdminService {
                 AuditAction.USER_ROLES_CHANGED,
                 "User",
                 savedUser.getId(),
-                "Roles do utilizador "
+                "User roles for "
                         + savedUser.getEmail()
-                        + " alterados para "
+                        + " changed to "
                         + rolesDescription
+                        + "."
         );
 
         return toResponse(savedUser);
@@ -179,7 +181,7 @@ public class AdminService {
                 .findById(userId)
                 .orElseThrow(() ->
                         new AdminUserNotFoundException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
     }
 
@@ -189,7 +191,7 @@ public class AdminService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new AdminUserNotFoundException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
     }
 
