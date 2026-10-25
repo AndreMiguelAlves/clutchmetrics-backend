@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import pt.clutchmetrics.dto.UpdateClipRequest;
 import java.nio.file.Path;
+import pt.clutchmetrics.dto.CreateTrimmedClipRequest;
 
 import java.util.List;
 
@@ -59,6 +60,50 @@ public class ClipController {
                 request
         );
 
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(toResponse(clip));
+    }
+
+
+    @PostMapping("/from-trimmed")
+    public ResponseEntity<ClipResponse> createTrimmedClipFromVideo(
+            Authentication authentication,
+            @Valid @RequestBody CreateTrimmedClipRequest request) {
+
+        Clip clip = clipService.createTrimmedClipFromVideo(
+                authentication.getName(),
+                request
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(toResponse(clip));
+    }
+
+
+    @PostMapping("/from-original")
+    public ResponseEntity<ClipResponse> createClipFromOriginal(
+            Authentication authentication,
+            @Valid @RequestBody CreateClipFromVideoRequest request) {
+
+        // Confirmar que existe um utilizador autenticado
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof AnonymousAuthenticationToken) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        // Criar o clip utilizando o MP4 original
+        Clip clip = clipService.createOriginalClipFromVideo(
+                authentication.getName(),
+                request
+        );
+
+        // Devolver o clip criado
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(toResponse(clip));
@@ -300,7 +345,7 @@ public class ClipController {
 
     private ClipResponse toResponse(Clip clip) {
 
-        return new ClipResponse(
+        ClipResponse response = new ClipResponse(
                 clip.getId(),
 
                 clip.getUser().getId(),
@@ -328,13 +373,17 @@ public class ClipController {
                 clipService.countComments(clip),
                 false
         );
+
+        response.setVideoVersion(clip.getVideoVersion());
+
+        return response;
     }
 
     private ClipResponse toFeedResponse(
             Clip clip,
             String email) {
 
-        return new ClipResponse(
+        ClipResponse response = new ClipResponse(
                 clip.getId(),
                 clip.getUser().getId(),
                 clip.getUser().getUsername(),
@@ -361,6 +410,10 @@ public class ClipController {
                 clipService.countComments(clip),
                 clipService.hasLiked(email, clip)
         );
+
+        response.setVideoVersion(clip.getVideoVersion());
+
+        return response;
     }
 
 }

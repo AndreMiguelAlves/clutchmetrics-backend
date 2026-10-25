@@ -3,6 +3,7 @@ package pt.clutchmetrics.dto;
 import pt.clutchmetrics.entity.ClipStatus;
 import pt.clutchmetrics.entity.ClipVisibility;
 import pt.clutchmetrics.entity.GameCode;
+import pt.clutchmetrics.entity.ClipVideoVersion;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,7 @@ public class ClipResponse {
 
     private ClipStatus status;
     private ClipVisibility visibility;
+    private ClipVideoVersion videoVersion;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -135,5 +137,13 @@ public class ClipResponse {
     }
     public boolean isLikedByCurrentUser() {
         return likedByCurrentUser;
+    }
+
+    public ClipVideoVersion getVideoVersion() {
+        return videoVersion;
+    }
+
+    public void setVideoVersion(ClipVideoVersion videoVersion) {
+        this.videoVersion = videoVersion;
     }
 }

@@ -35,6 +35,9 @@ public class Clip {
     @Column(name = "video_version", length = 20)
     private ClipVideoVersion videoVersion;
 
+    @Column(name = "trimmed_file_name", length = 255)
+    private String trimmedFileName;
+
 
     @Column(name = "video_url", nullable = false, length = 500)
     private String videoUrl;
@@ -182,5 +185,12 @@ public class Clip {
 
     public void setVideoVersion(ClipVideoVersion videoVersion) {
         this.videoVersion = videoVersion;
+    }
+    public String getTrimmedFileName() {
+        return trimmedFileName;
+    }
+
+    public void setTrimmedFileName(String trimmedFileName) {
+        this.trimmedFileName = trimmedFileName;
     }
 }

@@ -41,7 +41,14 @@ import pt.clutchmetrics.entity.VideoAsset;
 import pt.clutchmetrics.repository.VideoAssetRepository;
 import java.nio.file.Path;
 import pt.clutchmetrics.dto.UpdateClipRequest;
+import pt.clutchmetrics.entity.ClipVideoVersion;
 
+import pt.clutchmetrics.dto.CreateTrimmedClipRequest;
+import pt.clutchmetrics.entity.ClipVideoVersion;
+import java.nio.file.Files;
+import java.io.IOException;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -201,6 +208,7 @@ public class ClipService {
         );
 
         clip.setVideoAsset(videoAsset);
+        clip.setVideoVersion(ClipVideoVersion.PROCESSED);
 
         clip.setDescription(
                 request.getDescription() != null
@@ -236,6 +244,90 @@ public class ClipService {
     }
 
     // =========================================================
+// CRIAR CLIP A PARTIR DO VÍDEO ORIGINAL
+// =========================================================
+
+    @Transactional
+    public Clip createOriginalClipFromVideo(
+            String email,
+            CreateClipFromVideoRequest request) {
+
+        // 1. Identificar o utilizador autenticado
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "User not found."
+                        )
+                );
+
+        // 2. Verificar se o vídeo pertence ao utilizador
+        VideoAsset videoAsset = videoAssetRepository
+                .findByIdAndUser_Id(
+                        request.getVideoAssetId(),
+                        user.getId()
+                )
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Video not found."
+                        )
+                );
+
+        // 3. Identificar o jogo
+        Game game = gameRepository
+                .findByCode(request.getGameCode())
+                .orElseThrow(() ->
+                        new GameNotFoundException(
+                                "The selected game does not exist."
+                        )
+                );
+
+        // 4. Criar um clip inicialmente privado
+        Clip clip = new Clip(
+                user,
+                game,
+                request.getTitle().trim(),
+                "pending"
+        );
+
+        // 5. Associar o ficheiro original
+        clip.setVideoAsset(videoAsset);
+        clip.setVideoVersion(ClipVideoVersion.ORIGINAL);
+
+        clip.setDescription(
+                request.getDescription() != null
+                        ? request.getDescription().trim()
+                        : null
+        );
+
+        // 6. Obter a duração real do MP4 original
+        clip.setDurationSeconds(
+                videoProcessingService.getOriginalVideoDuration(
+                        videoAsset.getOriginalFileName()
+                )
+        );
+
+        // 7. O original já está pronto para reprodução
+        clip.setStatus(ClipStatus.READY);
+
+        // 8. Guardar o clip para obter o seu ID
+        Clip savedClip = clipRepository.saveAndFlush(clip);
+
+        // 9. Criar o URL de reprodução
+        String videoUrl = appBaseUrl.replaceAll("/+$", "")
+                + "/api/clips/"
+                + savedClip.getId()
+                + "/video";
+
+        savedClip.setVideoUrl(videoUrl);
+
+        // 10. Guardar o endereço definitivo
+        return clipRepository.saveAndFlush(savedClip);
+    }
+
+    // =========================================================
 // EDITAR TÍTULO E DESCRIÇÃO DO CLIP
 // =========================================================
 
@@ -262,6 +354,114 @@ public class ClipService {
         // Guardar as alterações
         return clipRepository.save(clip);
     }
+
+
+    @Transactional
+    public Clip createTrimmedClipFromVideo(
+            String email,
+            CreateTrimmedClipRequest request) {
+
+        // 1. Identificar o utilizador autenticado
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "User not found."
+                        )
+                );
+
+        // 2. Confirmar que o vídeo pertence ao utilizador
+        VideoAsset videoAsset = videoAssetRepository
+                .findByIdAndUser_Id(
+                        request.getVideoAssetId(),
+                        user.getId()
+                )
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Video not found."
+                        )
+                );
+
+        // 3. Identificar o jogo
+        Game game = gameRepository
+                .findByCode(request.getGameCode())
+                .orElseThrow(() ->
+                        new GameNotFoundException(
+                                "The selected game does not exist."
+                        )
+                );
+
+        String trimmedFileName = null;
+
+        try {
+            // 4. Criar o MP4 cortado a partir do original
+            trimmedFileName = videoProcessingService
+                    .trimOriginalVideo(
+                            videoAsset.getOriginalFileName(),
+                            request.getStartSeconds(),
+                            request.getEndSeconds()
+                    );
+
+            // 5. Obter a duração real do novo ficheiro
+            int durationSeconds = videoProcessingService
+                    .getProcessedVideoDuration(trimmedFileName);
+
+            // 6. Criar um clip independente e privado
+            Clip clip = new Clip(
+                    user,
+                    game,
+                    request.getTitle().trim(),
+                    "pending"
+            );
+
+            clip.setVideoAsset(videoAsset);
+
+            clip.setDescription(
+                    request.getDescription() != null
+                            ? request.getDescription().trim()
+                            : null
+            );
+
+            clip.setVideoVersion(ClipVideoVersion.TRIMMED);
+            clip.setTrimmedFileName(trimmedFileName);
+            clip.setDurationSeconds(durationSeconds);
+            clip.setStatus(ClipStatus.READY);
+            clip.setVisibility(ClipVisibility.PRIVATE);
+
+            // 7. Guardar para obter o ID do clip
+            Clip savedClip = clipRepository.saveAndFlush(clip);
+
+            // 8. Criar o endereço de reprodução
+            String videoUrl = appBaseUrl.replaceAll("/+$", "")
+                    + "/api/clips/"
+                    + savedClip.getId()
+                    + "/video";
+
+            savedClip.setVideoUrl(videoUrl);
+
+            return clipRepository.saveAndFlush(savedClip);
+
+        } catch (RuntimeException exception) {
+
+            // Eliminar o MP4 gerado se a criação falhar
+            if (trimmedFileName != null) {
+                try {
+                    Files.deleteIfExists(
+                            videoStorageService.getProcessedVideoPath(
+                                    trimmedFileName
+                            )
+                    );
+                } catch (IOException | RuntimeException cleanupError) {
+                    exception.addSuppressed(cleanupError);
+                }
+            }
+
+            throw exception;
+        }
+    }
+
 
     // =========================================================
     // LISTAR OS MEUS CLIPS
@@ -429,30 +629,89 @@ public class ClipService {
             );
         }
 
-        // 5. Confirmar que está associado a um VideoAsset
+        // 5. Verificar a associação ao vídeo
         VideoAsset videoAsset = clip.getVideoAsset();
 
         if (videoAsset == null ||
                 !videoAsset.getUser().getId()
-                        .equals(clip.getUser().getId()) ||
-                videoAsset.getProcessedFileName() == null ||
-                videoAsset.getProcessedFileName().isBlank()) {
+                        .equals(clip.getUser().getId())) {
 
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Processed video not found."
+                    "Video not found."
             );
         }
 
-        // 6. Localizar o MP4 no armazenamento
+        // 6. Identificar a versão utilizada pelo clip
+        ClipVideoVersion videoVersion = clip.getVideoVersion();
+
         try {
+// Clips cortados que mantêm o formato original
+            if (clip.getVideoVersion() == ClipVideoVersion.TRIMMED) {
+
+                String trimmedFileName = clip.getTrimmedFileName();
+
+                if (trimmedFileName == null || trimmedFileName.isBlank()) {
+                    throw new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Trimmed video not found."
+                    );
+                }
+
+                try {
+                    return videoStorageService.getProcessedVideoPath(
+                            trimmedFileName
+                    );
+                } catch (IllegalArgumentException exception) {
+                    throw new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Trimmed video not found."
+                    );
+                }
+            }
+            // Keep Original: utilizar o MP4 original
+            if (videoVersion == ClipVideoVersion.ORIGINAL) {
+
+                String originalFileName =
+                        videoAsset.getOriginalFileName();
+
+                if (originalFileName == null ||
+                        originalFileName.isBlank()) {
+
+                    throw new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Original video not found."
+                    );
+                }
+
+                return videoStorageService.getOriginalVideoPath(
+                        originalFileName
+                );
+            }
+
+            // Video Editor: utilizar o MP4 processado
+            // NULL também corresponde aos clips antigos
+            String processedFileName =
+                    videoAsset.getProcessedFileName();
+
+            if (processedFileName == null ||
+                    processedFileName.isBlank()) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Processed video not found."
+                );
+            }
+
             return videoStorageService.getProcessedVideoPath(
-                    videoAsset.getProcessedFileName()
+                    processedFileName
             );
+
         } catch (IllegalArgumentException exception) {
+
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Processed video not found."
+                    "Video file not found."
             );
         }
     }
@@ -737,6 +996,37 @@ public class ClipService {
 
         // Eliminar o clip
         clipRepository.delete(clip);
+
+        // Eliminar o MP4 cortado apenas depois de a BD confirmar
+        // a eliminação do clip.
+        if (clip.getVideoVersion() == ClipVideoVersion.TRIMMED) {
+
+            String trimmedFileName = clip.getTrimmedFileName();
+
+            if (trimmedFileName != null && !trimmedFileName.isBlank()) {
+
+                TransactionSynchronizationManager.registerSynchronization(
+                        new TransactionSynchronization() {
+                            @Override
+                            public void afterCommit() {
+                                try {
+                                    Files.deleteIfExists(
+                                            videoStorageService.getProcessedVideoPath(
+                                                    trimmedFileName
+                                            )
+                                    );
+                                } catch (IOException | IllegalArgumentException e) {
+                                    System.err.println(
+                                            "Could not delete trimmed video: "
+                                                    + e.getMessage()
+                                    );
+                                }
+                            }
+                        }
+                );
+            }
+        }
+
 
         // Registar a eliminação nos Audit Logs
         auditService.log(

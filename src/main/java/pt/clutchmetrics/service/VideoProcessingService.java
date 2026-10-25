@@ -186,6 +186,148 @@ public class VideoProcessingService {
     }
 
 
+    public String trimOriginalVideo(
+            String originalFileName,
+            int startSeconds,
+            int endSeconds) {
+
+        // 1. Validar o intervalo selecionado
+        if (startSeconds < 0 || endSeconds <= startSeconds) {
+            throw new IllegalArgumentException(
+                    "Invalid video interval."
+            );
+        }
+
+        int duration = endSeconds - startSeconds;
+
+        if (duration > 60) {
+            throw new IllegalArgumentException(
+                    "The trimmed clip cannot exceed 60 seconds."
+            );
+        }
+
+        // 2. Localizar o ficheiro original
+        Path input = videoStorageService
+                .getOriginalVideoPath(originalFileName);
+
+        // 3. Verificar a duração real do vídeo
+        double originalDuration = getVideoDuration(input);
+
+        if (endSeconds > originalDuration) {
+            throw new IllegalArgumentException(
+                    "The selected interval exceeds the video duration."
+            );
+        }
+
+        // 4. Criar um ficheiro de saída independente
+        Path output = videoStorageService
+                .createProcessedVideoPath();
+
+        // 5. Cortar sem alterar a resolução ou proporção
+        List<String> command = List.of(
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel", "error",
+                "-nostdin",
+                "-y",
+                "-ss", String.valueOf(startSeconds),
+                "-i", input.toString(),
+                "-t", String.valueOf(duration),
+                "-map", "0:v:0",
+                "-map", "0:a?",
+                "-c:v", "libx264",
+                "-preset", "veryfast",
+                "-crf", "18",
+                "-pix_fmt", "yuv420p",
+                "-c:a", "aac",
+                "-b:a", "128k",
+                "-movflags", "+faststart",
+                output.toString()
+        );
+
+        Path logFile;
+
+        try {
+            logFile = Files.createTempFile(
+                    "clutchmetrics-trim-", ".log"
+            );
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Could not prepare video trimming.", e
+            );
+        }
+
+        boolean success = false;
+
+        try {
+            ProcessBuilder builder = new ProcessBuilder(command);
+
+            builder.redirectErrorStream(true);
+            builder.redirectOutput(logFile.toFile());
+
+            Process process = builder.start();
+
+            // 6. Impedir que o processamento fique bloqueado
+            boolean finished = process.waitFor(
+                    180, TimeUnit.SECONDS
+            );
+
+            if (!finished) {
+                process.destroyForcibly();
+                process.waitFor();
+
+                throw new IllegalStateException(
+                        "Video trimming timed out."
+                );
+            }
+
+            if (process.exitValue() != 0) {
+                throw new IllegalStateException(
+                        "FFmpeg could not trim this video."
+                );
+            }
+
+            // 7. Confirmar que o MP4 foi criado
+            if (!Files.isRegularFile(output)
+                    || Files.size(output) == 0) {
+
+                throw new IllegalStateException(
+                        "The trimmed video was not created."
+                );
+            }
+
+            success = true;
+
+            // Devolver o nome do novo ficheiro
+            return output.getFileName().toString();
+
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Error while trimming video.", e
+            );
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+
+            throw new IllegalStateException(
+                    "Video trimming was interrupted.", e
+            );
+
+        } finally {
+            try {
+                Files.deleteIfExists(logFile);
+
+                if (!success) {
+                    Files.deleteIfExists(output);
+                }
+            } catch (IOException ignored) {
+                // Limpeza dos ficheiros temporários.
+            }
+        }
+    }
+
+
+
     public int getProcessedVideoDuration(String processedFileName) {
 
         // 1. Localizar o MP4 processado
@@ -199,6 +341,18 @@ public class VideoProcessingService {
         return Math.max(1, (int) Math.round(duration));
     }
 
+    public int getOriginalVideoDuration(String originalFileName) {
+
+        // Localizar o MP4 original no armazenamento
+        Path videoPath = videoStorageService
+                .getOriginalVideoPath(originalFileName);
+
+        // Consultar a duração real através do FFprobe
+        double duration = getVideoDuration(videoPath);
+
+        // Converter a duração para segundos inteiros
+        return Math.max(1, (int) Math.round(duration));
+    }
 
     private double getVideoDuration(Path videoPath) {
 
