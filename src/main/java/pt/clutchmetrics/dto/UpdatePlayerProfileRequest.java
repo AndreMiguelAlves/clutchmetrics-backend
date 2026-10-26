@@ -15,6 +15,11 @@ public class UpdatePlayerProfileRequest {
     @Size(max = 500, message = "O URL do avatar não pode ultrapassar 500 caracteres")
     private String avatarUrl;
 
+    private String youtubeUrl;
+    private String twitchUrl;
+    private String tiktokUrl;
+    private String instagramUrl;
+
     public UpdatePlayerProfileRequest() {
     }
 
@@ -41,4 +46,38 @@ public class UpdatePlayerProfileRequest {
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
     }
+
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
+    }
+
+    public void setYoutubeUrl(String youtubeUrl) {
+        this.youtubeUrl = youtubeUrl;
+    }
+
+    public String getTwitchUrl() {
+        return twitchUrl;
+    }
+
+    public void setTwitchUrl(String twitchUrl) {
+        this.twitchUrl = twitchUrl;
+    }
+
+    public String getTiktokUrl() {
+        return tiktokUrl;
+    }
+
+    public void setTiktokUrl(String tiktokUrl) {
+        this.tiktokUrl = tiktokUrl;
+    }
+
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
+
+    public void setInstagramUrl(String instagramUrl) {
+        this.instagramUrl = instagramUrl;
+    }
+
 }

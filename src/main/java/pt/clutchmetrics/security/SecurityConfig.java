@@ -61,11 +61,23 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/players/*").permitAll()
 
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/players/discover"
+                        ).authenticated()
 
-                                .requestMatchers(HttpMethod.GET, "/api/clips/players/*")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/players/*"
+                        ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/clips/players/*")
                                 .permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/profile/avatars/*"
+                        ).permitAll()
 
                                 // Permitir pedidos de reprodução dos clips.
                                 // A visibilidade é verificada pelo ClipService.

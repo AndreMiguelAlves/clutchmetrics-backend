@@ -8,19 +8,31 @@ public class PublicPlayerProfileResponse {
     private final String displayName;
     private final String bio;
     private final String avatarUrl;
+    private final String youtubeUrl;
+    private final String twitchUrl;
+    private final String tiktokUrl;
+    private final String instagramUrl;
 
     public PublicPlayerProfileResponse(
             Long userId,
             String username,
             String displayName,
             String bio,
-            String avatarUrl
+            String avatarUrl,
+            String youtubeUrl,
+            String twitchUrl,
+            String tiktokUrl,
+            String instagramUrl
     ) {
         this.userId = userId;
         this.username = username;
         this.displayName = displayName;
         this.bio = bio;
         this.avatarUrl = avatarUrl;
+        this.youtubeUrl = youtubeUrl;
+        this.twitchUrl = twitchUrl;
+        this.tiktokUrl = tiktokUrl;
+        this.instagramUrl = instagramUrl;
     }
 
     public Long getUserId() {
@@ -42,4 +54,22 @@ public class PublicPlayerProfileResponse {
     public String getAvatarUrl() {
         return avatarUrl;
     }
+
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
+    }
+
+    public String getTwitchUrl() {
+        return twitchUrl;
+    }
+
+    public String getTiktokUrl() {
+        return tiktokUrl;
+    }
+
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
+
 }

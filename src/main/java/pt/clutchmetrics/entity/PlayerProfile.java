@@ -25,6 +25,20 @@ public class PlayerProfile {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
+
+    @Column(name = "youtube_url", length = 2048)
+    private String youtubeUrl;
+
+    @Column(name = "twitch_url", length = 2048)
+    private String twitchUrl;
+
+    @Column(name = "tiktok_url", length = 2048)
+    private String tiktokUrl;
+
+    @Column(name = "instagram_url", length = 2048)
+    private String instagramUrl;
+
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -88,4 +102,38 @@ public class PlayerProfile {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
+    }
+
+    public void setYoutubeUrl(String youtubeUrl) {
+        this.youtubeUrl = youtubeUrl;
+    }
+
+    public String getTwitchUrl() {
+        return twitchUrl;
+    }
+
+    public void setTwitchUrl(String twitchUrl) {
+        this.twitchUrl = twitchUrl;
+    }
+
+    public String getTiktokUrl() {
+        return tiktokUrl;
+    }
+
+    public void setTiktokUrl(String tiktokUrl) {
+        this.tiktokUrl = tiktokUrl;
+    }
+
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
+
+    public void setInstagramUrl(String instagramUrl) {
+        this.instagramUrl = instagramUrl;
+    }
+
 }
