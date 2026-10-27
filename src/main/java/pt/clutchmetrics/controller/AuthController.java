@@ -1,30 +1,36 @@
+
 package pt.clutchmetrics.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import pt.clutchmetrics.dto.RegisterRequest;
-import pt.clutchmetrics.dto.RegisterResponse;
-import pt.clutchmetrics.entity.User;
-import pt.clutchmetrics.service.AuthService;
+import org.springframework.web.server.ResponseStatusException;
+
+import pt.clutchmetrics.dto.AuthMeResponse;
+import pt.clutchmetrics.dto.ChangePasswordRequest;
+import pt.clutchmetrics.dto.ForgotPasswordRequest;
 import pt.clutchmetrics.dto.LoginRequest;
 import pt.clutchmetrics.dto.LoginResponse;
-import pt.clutchmetrics.security.JwtService;
-import org.springframework.security.core.Authentication;
-import pt.clutchmetrics.entity.RefreshToken;
-import pt.clutchmetrics.service.RefreshTokenService;
+import pt.clutchmetrics.dto.LogoutRequest;
 import pt.clutchmetrics.dto.RefreshTokenRequest;
 import pt.clutchmetrics.dto.RefreshTokenResponse;
-import pt.clutchmetrics.dto.LogoutRequest;
-import pt.clutchmetrics.dto.ForgotPasswordRequest;
+import pt.clutchmetrics.dto.RegisterRequest;
+import pt.clutchmetrics.dto.RegisterResponse;
 import pt.clutchmetrics.dto.ResetPasswordRequest;
-import pt.clutchmetrics.dto.ChangePasswordRequest;
-import pt.clutchmetrics.dto.AuthMeResponse;
-import java.net.URI;
-import org.springframework.http.HttpStatus;
 
+import pt.clutchmetrics.entity.RefreshToken;
+import pt.clutchmetrics.entity.User;
+
+import pt.clutchmetrics.security.JwtService;
+
+import pt.clutchmetrics.service.AuthService;
+import pt.clutchmetrics.service.RefreshTokenService;
+
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -44,6 +50,7 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
 
+    // Register a new user account.
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(
             @Valid @RequestBody RegisterRequest request) {
@@ -62,15 +69,14 @@ public class AuthController {
                 .body(response);
     }
 
-
+    // Verify the user's email address.
     @GetMapping("/verify-email")
     public ResponseEntity<Void> verifyEmail(
             @RequestParam String token) {
 
-        // Validar o token e confirmar a conta
         authService.verifyEmail(token);
 
-        // Redirecionar para o Login do ClutchMetrics
+        // Redirect to the ClutchMetrics login page.
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .location(URI.create(
@@ -79,7 +85,7 @@ public class AuthController {
                 .build();
     }
 
-
+    // Authenticate the user and generate tokens.
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request) {
@@ -103,6 +109,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // Retrieve information about the authenticated user.
     @GetMapping("/me")
     public ResponseEntity<AuthMeResponse> me(
             Authentication authentication) {
@@ -126,6 +133,7 @@ public class AuthController {
         );
     }
 
+    // Generate a new access token and refresh token.
     @PostMapping("/refresh")
     public ResponseEntity<RefreshTokenResponse> refresh(
             @Valid @RequestBody RefreshTokenRequest request) {
@@ -148,6 +156,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // Revoke the user's refresh token.
     @PostMapping("/logout")
     public ResponseEntity<String> logout(
             @Valid @RequestBody LogoutRequest request) {
@@ -157,10 +166,11 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(
-                "Sessão terminada com sucesso."
+                "Logged out successfully."
         );
     }
 
+    // Send password recovery instructions by email.
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
@@ -168,10 +178,12 @@ public class AuthController {
         authService.forgotPassword(request.getEmail());
 
         return ResponseEntity.ok(
-                "Se existir uma conta com esse email, receberás instruções para recuperar a password."
+                "If an account exists with this email address, " +
+                        "you will receive password reset instructions."
         );
     }
 
+    // Reset a forgotten password using a valid token.
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
@@ -182,10 +194,12 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(
-                "Password alterada com sucesso."
+                "Password updated successfully."
         );
     }
 
+    // Request a password change for the authenticated user.
+    // The password is not changed until email confirmation.
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(
             Authentication authentication,
@@ -198,7 +212,29 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(
-                "Password alterada com sucesso."
+                "A confirmation link has been sent to your email. " +
+                        "Your password will only change after confirmation."
+        );
+    }
+
+    // Confirm a pending password change using an email token.
+    @PostMapping("/confirm-password-change")
+    public ResponseEntity<String> confirmPasswordChange(
+            @RequestBody Map<String, String> request) {
+
+        String token = request.get("token");
+
+        if (token == null || token.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid password change token."
+            );
+        }
+
+        authService.confirmPasswordChange(token);
+
+        return ResponseEntity.ok(
+                "Password changed successfully. Please sign in again."
         );
     }
 }

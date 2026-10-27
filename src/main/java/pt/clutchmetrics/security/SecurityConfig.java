@@ -1,8 +1,10 @@
+
 package pt.clutchmetrics.security;
 
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -10,7 +12,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class SecurityConfig {
                                 DispatcherType.ERROR
                         ).permitAll()
 
+                        // Public authentication endpoints.
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
@@ -61,34 +63,52 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
+                        // Allow password change confirmation
+                        // without an authenticated session.
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/auth/confirm-password-change"
+                        ).permitAll()
 
+                        // Player discovery requires authentication.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/players/discover"
                         ).authenticated()
 
+                        // Public player profiles.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/players/*"
                         ).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/clips/players/*")
-                                .permitAll()
+                        // Public player clips.
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/clips/players/*"
+                        ).permitAll()
+
+                        // Public profile avatars.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/profile/avatars/*"
                         ).permitAll()
 
-                                // Permitir pedidos de reprodução dos clips.
-                                // A visibilidade é verificada pelo ClipService.
-                                .requestMatchers(HttpMethod.GET, "/api/clips/*/video")
-                                .permitAll()
+                        // Allow clip video playback requests.
+                        // Clip visibility is checked by ClipService.
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/clips/*/video"
+                        ).permitAll()
 
-                                .requestMatchers("/api/admin/**")
-                                .hasRole("ADMIN")
+                        // Restrict administration endpoints
+                        // to users with the ADMIN role.
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
 
-
-                                .anyRequest()
+                        // All remaining endpoints
+                        // require authentication.
+                        .anyRequest()
                         .authenticated()
                 )
 
@@ -140,5 +160,4 @@ public class SecurityConfig {
 
         return source;
     }
-
 }

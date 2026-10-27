@@ -26,6 +26,11 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = false;
 
+
+    @Column(name = "token_version", nullable = false)
+    private int tokenVersion = 0;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -118,4 +123,14 @@ public class User {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void incrementTokenVersion() {
+        this.tokenVersion++;
+    }
+
 }

@@ -26,6 +26,14 @@ import pt.clutchmetrics.exception.InvalidPasswordResetTokenException;
 import pt.clutchmetrics.exception.InvalidCurrentPasswordException;
 import pt.clutchmetrics.audit.AuditAction;
 import pt.clutchmetrics.audit.AuditService;
+import pt.clutchmetrics.repository.PasswordChangeTokenRepository;
+import pt.clutchmetrics.entity.PasswordChangeToken;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -39,6 +47,7 @@ public class AuthService {
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordChangeTokenRepository passwordChangeTokenRepository;
     private final RefreshTokenService refreshTokenService;
     private final PlayerProfileService playerProfileService;
     private final SubscriptionService subscriptionService;
@@ -50,6 +59,7 @@ public class AuthService {
             PasswordEncoder passwordEncoder,
             EmailVerificationTokenRepository emailVerificationTokenRepository,
             PasswordResetTokenRepository passwordResetTokenRepository,
+            PasswordChangeTokenRepository passwordChangeTokenRepository,
             RefreshTokenService refreshTokenService,
             EmailService emailService,
             PlayerProfileService playerProfileService,
@@ -62,6 +72,7 @@ public class AuthService {
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.passwordChangeTokenRepository = passwordChangeTokenRepository;
         this.refreshTokenService = refreshTokenService;
         this.playerProfileService = playerProfileService;
         this.subscriptionService = subscriptionService;
@@ -236,14 +247,25 @@ public class AuthService {
         String newPasswordHash =
                 passwordEncoder.encode(newPassword);
 
+
         user.setPasswordHash(newPasswordHash);
+
+// Invalidate previously issued access tokens.
+        user.incrementTokenVersion();
 
         userRepository.save(user);
 
+
+
         passwordResetTokenRepository.delete(passwordResetToken);
 
+// Cancel any pending password change requests.
+        passwordChangeTokenRepository.deleteByUser(user);
+
         refreshTokenService.revokeAllUserTokens(user);
+
     }
+
 
     @Transactional
     public void changePassword(
@@ -255,33 +277,138 @@ public class AuthService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new InvalidCredentialsException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
+        // Verificar a password atual.
         if (!passwordEncoder.matches(
                 currentPassword,
                 user.getPasswordHash())) {
 
             throw new InvalidCurrentPasswordException(
-                    "A password atual está incorreta."
+                    "The current password is incorrect."
             );
         }
 
+        // Eliminar pedidos anteriores deste utilizador.
+        passwordChangeTokenRepository.deleteByUser(user);
+        passwordChangeTokenRepository.flush();
+
+        // Criar um token aleatório de confirmação.
+        String token = UUID.randomUUID().toString();
+
+        // Guardar apenas o hash do token.
+        String tokenHash = hashPasswordChangeToken(token);
+
+        // Proteger a nova password antes de a guardar.
         String newPasswordHash =
                 passwordEncoder.encode(newPassword);
 
-        user.setPasswordHash(newPasswordHash);
+        // Criar pedido com validade de 15 minutos.
+        PasswordChangeToken passwordChangeToken =
+                new PasswordChangeToken(
+                        user,
+                        tokenHash,
+                        newPasswordHash,
+                        LocalDateTime.now().plusMinutes(15)
+                );
+
+        passwordChangeTokenRepository.save(passwordChangeToken);
+
+        // Enviar o link de confirmação por email.
+        emailService.sendPasswordChangeConfirmationEmail(
+                user.getEmail(),
+                token
+        );
+    }
+
+
+    @Transactional
+    public void confirmPasswordChange(String token) {
+
+        // Verificar se foi fornecido um token.
+        if (token == null || token.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid password change token."
+            );
+        }
+
+        // Proteger o token recebido antes de o pesquisar.
+        String tokenHash = hashPasswordChangeToken(token);
+
+        // Procurar o pedido de alteração de password.
+        PasswordChangeToken passwordChangeToken =
+                passwordChangeTokenRepository
+                        .findByTokenHash(tokenHash)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "Invalid password change token."
+                                )
+                        );
+
+        // Verificar se o pedido expirou.
+        if (passwordChangeToken.isExpired()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password change confirmation link has expired."
+            );
+        }
+
+        // Identificar o utilizador.
+        User user = passwordChangeToken.getUser();
+
+        // Atualizar a password com o hash guardado.
+
+        user.setPasswordHash(
+                passwordChangeToken.getNewPasswordHash()
+        );
+
+// Invalidate previously issued access tokens.
+        user.incrementTokenVersion();
 
         userRepository.save(user);
 
+
+
+        passwordChangeTokenRepository.deleteByUser(user);
+
+// Invalidate any pending password recovery links.
+        passwordResetTokenRepository.deleteByUser(user);
+
         refreshTokenService.revokeAllUserTokens(user);
 
+
+        // Registar a alteração nos Audit Logs.
         auditService.log(
                 user,
                 AuditAction.PASSWORD_CHANGED,
                 "User",
                 user.getId(),
-                "Utilizador alterou a password."
+                "User confirmed the password change by email."
         );
     }
+
+
+    private String hashPasswordChangeToken(String token) {
+
+        try {
+            MessageDigest digest =
+                    MessageDigest.getInstance("SHA-256");
+
+            byte[] hash = digest.digest(
+                    token.getBytes(StandardCharsets.UTF_8)
+            );
+
+            return HexFormat.of().formatHex(hash);
+
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException(
+                    "SHA-256 algorithm is not available.",
+                    exception
+            );
+        }
+    }
+
 }

@@ -55,6 +55,26 @@ public class PlayerGameAccountController {
         return ResponseEntity.ok(response);
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PlayerGameAccountResponse> update(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdatePlayerGameAccountRequest request) {
+
+        PlayerGameAccount account =
+                playerGameAccountService.update(
+                        authentication.getName(),
+                        id,
+                        request
+                );
+
+        return ResponseEntity.ok(
+                toResponse(account)
+        );
+    }
+
+
     @PutMapping("/{id}/disconnect")
     public ResponseEntity<PlayerGameAccountResponse> disconnect(
             Authentication authentication,

@@ -33,28 +33,40 @@ public class JwtService {
                 .map(role -> role.getName().name())
                 .toList();
 
+
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("userId", user.getId())
                 .claim("roles", roles)
+                .claim("tokenVersion", user.getTokenVersion())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
+
     }
 
     public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+
     public boolean isTokenValid(String token, User user) {
 
-        String email = extractEmail(token);
+        Claims claims = extractAllClaims(token);
+
+        String email = claims.getSubject();
+
+        Integer tokenVersion =
+                claims.get("tokenVersion", Integer.class);
 
         return email.equals(user.getEmail())
                 && user.isEnabled()
+                && tokenVersion != null
+                && tokenVersion == user.getTokenVersion()
                 && !isTokenExpired(token);
     }
+
 
     private boolean isTokenExpired(String token) {
         return extractAllClaims(token)

@@ -45,14 +45,14 @@ public class PlayerGameAccountService {
                 .findByCode(request.getGameCode())
                 .orElseThrow(() ->
                         new GameNotFoundException(
-                                "O jogo selecionado não existe."
+                                "The selected game does not exist."
                         ));
 
         if (playerGameAccountRepository
                 .existsByPlayerProfileAndGame(profile, game)) {
 
             throw new DuplicatePlayerGameAccountException(
-                    "Já tens uma conta associada a este jogo."
+                    "You already have an account linked to this game."
             );
         }
 
