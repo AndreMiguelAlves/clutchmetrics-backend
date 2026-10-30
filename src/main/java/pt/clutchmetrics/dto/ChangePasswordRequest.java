@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Size;
 
 public class ChangePasswordRequest {
 
-    @NotBlank(message = "A password atual é obrigatória")
+    @NotBlank(message = "Current password is required.")
     private String currentPassword;
 
-    @NotBlank(message = "A nova password é obrigatória")
+    @NotBlank(message = "New password is required.")
     @Size(
             min = 8,
             max = 72,
-            message = "A nova password deve ter entre 8 e 72 caracteres"
+            message = "New password must be between 8 and 72 characters."
     )
     private String newPassword;
 

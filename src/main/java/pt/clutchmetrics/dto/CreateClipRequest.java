@@ -8,24 +8,24 @@ import jakarta.validation.constraints.NotNull;
 
 public class CreateClipRequest {
 
-    @NotNull(message = "O jogo é obrigatório.")
+    @NotNull(message = "Game is required.")
     private GameCode gameCode;
 
-    @NotBlank(message = "O título é obrigatório")
-    @Size(max = 150, message = "O título não pode ultrapassar 150 caracteres")
+    @NotBlank(message = "Title is required.")
+    @Size(max = 150, message = "Title must not exceed 150 characters.")
     private String title;
 
-    @Size(max = 1000, message = "A descrição não pode ultrapassar 1000 caracteres")
+    @Size(max = 1000, message = "Description must not exceed 1000 characters.")
     private String description;
 
-    @NotBlank(message = "O URL do vídeo é obrigatório")
-    @Size(max = 500, message = "O URL do vídeo não pode ultrapassar 500 caracteres")
+    @NotBlank(message = "Video URL is required.")
+    @Size(max = 500, message = "Video URL must not exceed 500 characters.")
     private String videoUrl;
 
-    @Size(max = 500, message = "O URL da thumbnail não pode ultrapassar 500 caracteres")
+    @Size(max = 500, message = "Video URL must not exceed 500 characters.")
     private String thumbnailUrl;
 
-    @Min(value = 0, message = "A duração não pode ser negativa")
+    @Min(value = 0, message = "Duration cannot be negative.")
     private Integer durationSeconds;
 
     public CreateClipRequest() {

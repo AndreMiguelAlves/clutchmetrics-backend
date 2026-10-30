@@ -5,10 +5,10 @@ import jakarta.validation.constraints.Size;
 
 public class CreateClipCommentRequest {
 
-    @NotBlank(message = "O comentário é obrigatório")
+    @NotBlank(message = "Comment is required.")
     @Size(
             max = 500,
-            message = "O comentário não pode ultrapassar 500 caracteres"
+            message = "Comment must not exceed 500 characters."
     )
     private String content;
 

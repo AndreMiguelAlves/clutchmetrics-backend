@@ -49,14 +49,14 @@ public class PlayerProfileService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new PlayerProfileNotFoundException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         return playerProfileRepository
                 .findByUser(user)
                 .orElseThrow(() ->
                         new PlayerProfileNotFoundException(
-                                "Perfil de jogador não encontrado."
+                                "Player profile not found."
                         ));
     }
 
@@ -145,7 +145,7 @@ public class PlayerProfileService {
                 .findByUserId(userId)
                 .orElseThrow(() ->
                         new PlayerProfileNotFoundException(
-                                "Perfil de jogador não encontrado."
+                                "Player profile not found."
                         )
                 );
 

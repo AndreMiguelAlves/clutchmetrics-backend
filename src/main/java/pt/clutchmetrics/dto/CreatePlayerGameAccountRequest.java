@@ -7,20 +7,20 @@ import pt.clutchmetrics.entity.GameCode;
 
 public class CreatePlayerGameAccountRequest {
 
-    @NotNull(message = "O jogo é obrigatório")
+    @NotNull(message = "Game is required.")
     private GameCode gameCode;
 
-    @NotBlank(message = "O nickname é obrigatório")
-    @Size(max = 100, message = "O nickname não pode ultrapassar 100 caracteres")
+    @NotBlank(message = "Nickname is required.")
+    @Size(max = 100, message = "Nickname must not exceed 100 characters.")
     private String nickname;
 
-    @Size(max = 150, message = "O external ID não pode ultrapassar 150 caracteres")
+    @Size(max = 150, message = "External ID must not exceed 150 characters.")
     private String externalId;
 
-    @Size(max = 50, message = "A região não pode ultrapassar 50 caracteres")
+    @Size(max = 50, message = "Region must not exceed 50 characters.")
     private String region;
 
-    @Size(max = 50, message = "A plataforma não pode ultrapassar 50 caracteres")
+    @Size(max = 50, message = "Platform must not exceed 50 characters.")
     private String platform;
 
     public CreatePlayerGameAccountRequest() {

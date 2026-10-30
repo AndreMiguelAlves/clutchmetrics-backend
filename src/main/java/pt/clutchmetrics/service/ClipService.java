@@ -110,7 +110,7 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         Game game = null;
@@ -121,7 +121,7 @@ public class ClipService {
                     .findByCode(request.getGameCode())
                     .orElseThrow(() ->
                             new GameNotFoundException(
-                                    "O jogo selecionado não existe."
+                                    "The selected game does not exist."
                             ));
         }
 
@@ -474,7 +474,7 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         return clipRepository
@@ -498,7 +498,7 @@ public class ClipService {
         if (clip.getStatus() != ClipStatus.UPLOADED) {
 
             throw new InvalidClipStateException(
-                    "Apenas clips com estado UPLOADED podem ser processados."
+                    "Only clips with UPLOADED status can be processed."
             );
         }
 
@@ -536,7 +536,7 @@ public class ClipService {
         if (clip.getStatus() != ClipStatus.READY) {
 
             throw new InvalidClipStateException(
-                    "O clip tem de estar READY antes de ser publicado."
+                    "Clip must have READY status before publishing."
             );
         }
 
@@ -567,7 +567,7 @@ public class ClipService {
                 AuditAction.CLIP_PUBLISHED,
                 "Clip",
                 savedClip.getId(),
-                "Utilizador publicou o clip: " + savedClip.getTitle()
+                "User published clip: " + savedClip.getTitle()
         );
 
         return savedClip;
@@ -755,21 +755,21 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         Clip clip = clipRepository
                 .findById(clipId)
                 .orElseThrow(() ->
                         new ClipNotFoundException(
-                                "O clip não existe."
+                                "Clip not found."
                         ));
 
         if (clip.getStatus() != ClipStatus.READY ||
                 clip.getVisibility() != ClipVisibility.PUBLIC) {
 
             throw new InvalidClipStateException(
-                    "Só é possível dar like em clips públicos e READY."
+                    "Only public clips with READY status can be liked."
             );
         }
 
@@ -777,7 +777,7 @@ public class ClipService {
                 .existsByClipAndUser(clip, user)) {
 
             throw new DuplicateClipLikeException(
-                    "Já deste like neste clip."
+                    "You have already liked this clip."
             );
         }
 
@@ -803,21 +803,21 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         Clip clip = clipRepository
                 .findById(clipId)
                 .orElseThrow(() ->
                         new ClipNotFoundException(
-                                "O clip não existe."
+                                "Clip not found."
                         ));
 
         if (!clipLikeRepository
                 .existsByClipAndUser(clip, user)) {
 
             throw new ClipNotFoundException(
-                    "Não existe like deste utilizador neste clip."
+                    "No like from this user was found for this clip."
             );
         }
 
@@ -853,21 +853,21 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         Clip clip = clipRepository
                 .findById(clipId)
                 .orElseThrow(() ->
                         new ClipNotFoundException(
-                                "O clip não existe."
+                                "Clip not found."
                         ));
 
         if (clip.getStatus() != ClipStatus.READY ||
                 clip.getVisibility() != ClipVisibility.PUBLIC) {
 
             throw new InvalidClipStateException(
-                    "Só é possível comentar clips públicos e READY."
+                    "Only public clips with READY status can be commented on."
             );
         }
 
@@ -898,7 +898,7 @@ public class ClipService {
                 .findById(clipId)
                 .orElseThrow(() ->
                         new ClipNotFoundException(
-                                "O clip não existe."
+                                "Clip not found."
                         ));
 
         return clipCommentRepository
@@ -921,7 +921,7 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         ClipComment comment =
@@ -932,7 +932,7 @@ public class ClipService {
                         )
                         .orElseThrow(() ->
                                 new ClipCommentNotFoundException(
-                                        "O comentário não existe ou não pertence ao utilizador."
+                                        "Comment not found or does not belong to this user."
                                 ));
 
         clipCommentRepository.delete(
@@ -958,7 +958,7 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         )
                 );
 
@@ -1052,7 +1052,7 @@ public class ClipService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Utilizador não encontrado."
+                                "User not found."
                         ));
 
         return clipRepository
@@ -1062,7 +1062,7 @@ public class ClipService {
                 )
                 .orElseThrow(() ->
                         new ClipNotFoundException(
-                                "O clip não existe ou não pertence ao utilizador."
+                                "Clip not found or does not belong to this user."
                         ));
     }
 

@@ -5,11 +5,11 @@ import jakarta.validation.constraints.Size;
 
 public class ResetPasswordRequest {
 
-    @NotBlank(message = "O token é obrigatório")
+    @NotBlank(message = "Token is required.")
     private String token;
 
-    @NotBlank(message = "A nova password é obrigatória")
-    @Size(min = 8, max = 72, message = "A password deve ter entre 8 e 72 caracteres")
+    @NotBlank(message = "New password is required.")
+    @Size(min = 8, max = 72, message = "New password must be between 8 and 72 characters.")
     private String newPassword;
 
     public ResetPasswordRequest() {

@@ -231,7 +231,7 @@ public class ClipController {
         );
 
         return ResponseEntity.ok(
-                "Like adicionado com sucesso."
+                "Clip liked successfully."
         );
     }
 
@@ -246,7 +246,7 @@ public class ClipController {
         );
 
         return ResponseEntity.ok(
-                "Like removido com sucesso."
+                "Clip unliked successfully."
         );
     }
 
@@ -305,7 +305,7 @@ public class ClipController {
         );
 
         return ResponseEntity.ok(
-                "Comentário eliminado com sucesso."
+                "Comment deleted successfully."
         );
     }
 

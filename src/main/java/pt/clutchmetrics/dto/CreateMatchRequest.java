@@ -10,36 +10,36 @@ import java.time.LocalDateTime;
 
 public class CreateMatchRequest {
 
-    @NotNull(message = "A conta de jogo é obrigatória")
+    @NotNull(message = "Game account is required.")
     private Long playerGameAccountId;
 
-    @Size(max = 150, message = "O ID externo da partida não pode ultrapassar 150 caracteres")
+    @Size(max = 150, message = "External match ID must not exceed 150 characters.")
     private String externalMatchId;
 
-    @NotNull(message = "O resultado da partida é obrigatório")
+    @NotNull(message = "Match result is required.")
     private MatchResult result;
 
     private MatchCategory category;
 
-    @NotNull(message = "A data da partida é obrigatória")
+    @NotNull(message = "Match date is required.")
     private LocalDateTime playedAt;
 
-    @Min(value = 0, message = "A duração não pode ser negativa")
+    @Min(value = 0, message = "Match duration cannot be negative.")
     private Integer durationSeconds;
 
-    @NotNull(message = "Kills é obrigatório")
-    @Min(value = 0, message = "Kills não pode ser negativo")
+    @NotNull(message = "Kills are required.")
+    @Min(value = 0, message = "Kills cannot be negative.")
     private Integer kills;
 
-    @NotNull(message = "Deaths é obrigatório")
-    @Min(value = 0, message = "Deaths não pode ser negativo")
+    @NotNull(message = "Deaths are required.")
+    @Min(value = 0, message = "Deaths cannot be negative.")
     private Integer deaths;
 
-    @NotNull(message = "Assists é obrigatório")
-    @Min(value = 0, message = "Assists não pode ser negativo")
+    @NotNull(message = "Assists are required.")
+    @Min(value = 0, message = "Assists cannot be negative.")
     private Integer assists;
 
-    @Min(value = 0, message = "O score não pode ser negativo")
+    @Min(value = 0, message = "Score cannot be negative.")
     private Integer score;
 
     public CreateMatchRequest() {

@@ -87,7 +87,7 @@ public class AuthService {
 
         if (userRepository.existsByEmail(email)) {
             throw new DuplicateEmailException(
-                    "Já existe uma conta com este email."
+                    "An account with this email already exists."
             );
         }
 
@@ -95,7 +95,7 @@ public class AuthService {
                 .findByName(RoleName.USER)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "A role USER não existe."
+                                "The USER role does not exist."
                         ));
 
         String passwordHash =
@@ -142,12 +142,12 @@ public class AuthService {
                         .findByToken(token)
                         .orElseThrow(() ->
                                 new InvalidVerificationTokenException(
-                                        "O token de confirmação é inválido."
+                                        "Invalid email verification token."
                                 ));
 
         if (verificationToken.isExpired()) {
             throw new ExpiredVerificationTokenException(
-                    "O token de confirmação expirou."
+                    "Email verification token has expired."
             );
         }
 
@@ -168,7 +168,7 @@ public class AuthService {
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new InvalidCredentialsException(
-                                "Email ou password incorretos."
+                                "Invalid email or password."
                         ));
 
         if (!passwordEncoder.matches(
@@ -176,13 +176,13 @@ public class AuthService {
                 user.getPasswordHash())) {
 
             throw new InvalidCredentialsException(
-                    "Email ou password incorretos."
+                    "Invalid email or password."
             );
         }
 
         if (!user.isEnabled()) {
             throw new AccountNotVerifiedException(
-                    "Confirma o teu email antes de iniciares sessão."
+                    "Please verify your email before signing in."
             );
         }
 
@@ -230,7 +230,7 @@ public class AuthService {
                         .findByToken(token)
                         .orElseThrow(() ->
                                 new InvalidPasswordResetTokenException(
-                                        "O token de recuperação é inválido."
+                                        "Invalid password reset token."
                                 ));
 
         if (passwordResetToken.isExpired()) {
@@ -238,7 +238,7 @@ public class AuthService {
             passwordResetTokenRepository.delete(passwordResetToken);
 
             throw new ExpiredPasswordResetTokenException(
-                    "O token de recuperação expirou."
+                    "Password reset token has expired."
             );
         }
 

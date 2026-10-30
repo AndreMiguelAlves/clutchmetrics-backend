@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
 
-    @NotBlank(message = "O email é obrigatório")
-    @Email(message = "O email não é válido")
+    @NotBlank(message = "Email is required.")
+    @Email(message = "Please enter a valid email address.")
     private String email;
 
-    @NotBlank(message = "A password é obrigatória")
+    @NotBlank(message = "Password is required.")
     private String password;
 
     public LoginRequest() {

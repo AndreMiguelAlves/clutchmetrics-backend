@@ -75,7 +75,7 @@ public class ChallengeService {
                 || now.isAfter(challenge.getEndsAt())) {
 
             throw new InvalidChallengeStateException(
-                    "Este challenge está fora do período de participação."
+                    "This challenge is outside the participation period."
             );
         }
 

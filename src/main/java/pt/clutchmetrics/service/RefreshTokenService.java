@@ -53,12 +53,12 @@ public class RefreshTokenService {
                 .findByToken(token)
                 .orElseThrow(() ->
                         new InvalidRefreshTokenException(
-                                "O refresh token é inválido."
+                                "Invalid refresh token."
                         ));
 
         if (refreshToken.isRevoked()) {
             throw new InvalidRefreshTokenException(
-                    "O refresh token já foi revogado."
+                    "Refresh token has already been revoked."
             );
         }
 
@@ -68,7 +68,7 @@ public class RefreshTokenService {
             refreshTokenRepository.save(refreshToken);
 
             throw new ExpiredRefreshTokenException(
-                    "O refresh token expirou."
+                    "Refresh token has expired."
             );
         }
 
@@ -76,7 +76,7 @@ public class RefreshTokenService {
 
         if (!user.isEnabled()) {
             throw new InvalidRefreshTokenException(
-                    "A conta não está ativa."
+                    "Account is not active."
             );
         }
 
@@ -93,12 +93,12 @@ public class RefreshTokenService {
                 .findByToken(token)
                 .orElseThrow(() ->
                         new InvalidRefreshTokenException(
-                                "O refresh token é inválido."
+                                "Invalid refresh token."
                         ));
 
         if (refreshToken.isRevoked()) {
             throw new InvalidRefreshTokenException(
-                    "O refresh token já foi revogado."
+                    "Refresh token has already been revoked."
             );
         }
 

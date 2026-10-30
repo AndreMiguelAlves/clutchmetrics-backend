@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Size;
 
 public class UpdatePlayerProfileRequest {
 
-    @NotBlank(message = "O nome público é obrigatório")
-    @Size(min = 3, max = 100, message = "O nome público deve ter entre 3 e 100 caracteres")
+    @NotBlank(message = "Display name is required.")
+    @Size(min = 3, max = 100, message = "Display name must be between 3 and 100 characters.")
     private String displayName;
 
-    @Size(max = 500, message = "A bio não pode ultrapassar 500 caracteres")
+    @Size(max = 500, message = "Bio must not exceed 500 characters.")
     private String bio;
 
-    @Size(max = 500, message = "O URL do avatar não pode ultrapassar 500 caracteres")
+    @Size(max = 500, message = "Avatar URL must not exceed 500 characters.")
     private String avatarUrl;
 
     private String youtubeUrl;

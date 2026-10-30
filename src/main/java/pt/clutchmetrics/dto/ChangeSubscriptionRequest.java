@@ -5,7 +5,7 @@ import pt.clutchmetrics.entity.PlanCode;
 
 public class ChangeSubscriptionRequest {
 
-    @NotNull(message = "O plano é obrigatório")
+    @NotNull(message = "Subscription plan is required.")
     private PlanCode planCode;
 
     public ChangeSubscriptionRequest() {
