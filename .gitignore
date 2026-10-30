@@ -33,5 +33,5 @@ build/
 .vscode/
 
 
-# ClutchMetrics - Video storage
-/storage/videos/
+# ClutchMetrics - Uploaded files and media storage
+/storage/
